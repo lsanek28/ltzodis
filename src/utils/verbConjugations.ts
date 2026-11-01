@@ -830,6 +830,1861 @@ const TOPIC_CONTEXT_COMPLEMENTS: Record<
   },
 };
 
+interface UkVerbParadigm {
+  nonPast: [string, string, string, string, string, string]; // as, tu, jis, mes, jus, jie
+  pastSg: string; // masc sg (Він / Я / Ти)
+  pastPl: string; // pl (Ми / Ви / Вони)
+  impTu: string;
+  impMes: string;
+  impJus: string;
+  isPerfective: boolean;
+}
+
+const EXACT_UK_VERB_PARADIGMS: Record<string, UkVerbParadigm> = {
+  бути: {
+    nonPast: ['є', 'є', 'є', 'є', 'є', 'є'],
+    pastSg: 'був',
+    pastPl: 'були',
+    impTu: 'будь',
+    impMes: 'будьмо',
+    impJus: 'будьте',
+    isPerfective: false,
+  },
+  мати: {
+    nonPast: ['маю', 'маєш', 'має', 'маємо', 'маєте', 'мають'],
+    pastSg: 'мав',
+    pastPl: 'мали',
+    impTu: 'май',
+    impMes: 'маймо',
+    impJus: 'майте',
+    isPerfective: false,
+  },
+  могти: {
+    nonPast: ['можу', 'можеш', 'може', 'можемо', 'можете', 'можуть'],
+    pastSg: 'міг',
+    pastPl: 'могли',
+    impTu: 'зможи',
+    impMes: 'зможімо',
+    impJus: 'зможіть',
+    isPerfective: false,
+  },
+  допомогти: {
+    nonPast: ['допоможу', 'допоможеш', 'допоможе', 'допоможемо', 'допоможете', 'допоможуть'],
+    pastSg: 'допоміг',
+    pastPl: 'допомогли',
+    impTu: 'допоможи',
+    impMes: 'допоможімо',
+    impJus: 'допоможіть',
+    isPerfective: true,
+  },
+  хотіти: {
+    nonPast: ['хочу', 'хочеш', 'хоче', 'хочемо', 'хочете', 'хочуть'],
+    pastSg: 'хотів',
+    pastPl: 'хотіли',
+    impTu: 'захочи',
+    impMes: 'захочімо',
+    impJus: 'захочіть',
+    isPerfective: false,
+  },
+  захотіти: {
+    nonPast: ['захочу', 'захочеш', 'захоче', 'захочемо', 'захочете', 'захочуть'],
+    pastSg: 'захотів',
+    pastPl: 'захотіли',
+    impTu: 'захочи',
+    impMes: 'захочімо',
+    impJus: 'захочіть',
+    isPerfective: true,
+  },
+  їсти: {
+    nonPast: ['їм', 'їси', 'їсть', 'їмо', 'їсте', 'їдять'],
+    pastSg: 'їв',
+    pastPl: 'їли',
+    impTu: 'їж',
+    impMes: 'їжмо',
+    impJus: 'їжте',
+    isPerfective: false,
+  },
+  'з’їсти': {
+    nonPast: ['з’їм', 'з’їси', 'з’їсть', 'з’їмо', 'з’їсте', 'з’їдять'],
+    pastSg: 'з’їв',
+    pastPl: 'з’їли',
+    impTu: 'з’їж',
+    impMes: 'з’їжмо',
+    impJus: 'з’їжте',
+    isPerfective: true,
+  },
+  дати: {
+    nonPast: ['дам', 'даси', 'дасть', 'дамо', 'дасте', 'дадуть'],
+    pastSg: 'дав',
+    pastPl: 'дали',
+    impTu: 'дай',
+    impMes: 'даймо',
+    impJus: 'дайте',
+    isPerfective: true,
+  },
+  віддати: {
+    nonPast: ['віддам', 'віддаси', 'віддасть', 'віддамо', 'віддасте', 'віддадуть'],
+    pastSg: 'віддав',
+    pastPl: 'віддали',
+    impTu: 'віддай',
+    impMes: 'віддаймо',
+    impJus: 'віддайте',
+    isPerfective: true,
+  },
+  продати: {
+    nonPast: ['продам', 'продаси', 'продасть', 'продамо', 'продасте', 'продадуть'],
+    pastSg: 'продав',
+    pastPl: 'продали',
+    impTu: 'продай',
+    impMes: 'продаймо',
+    impJus: 'продайте',
+    isPerfective: true,
+  },
+  іти: {
+    nonPast: ['іду', 'ідеш', 'іде', 'ідемо', 'ідете', 'ідуть'],
+    pastSg: 'ішов',
+    pastPl: 'ішли',
+    impTu: 'іди',
+    impMes: 'ідімо',
+    impJus: 'ідіть',
+    isPerfective: false,
+  },
+  прийти: {
+    nonPast: ['прийду', 'прийдеш', 'прийде', 'прийдемо', 'прийдете', 'прийдуть'],
+    pastSg: 'прийшов',
+    pastPl: 'прийшли',
+    impTu: 'прийди',
+    impMes: 'прийдімо',
+    impJus: 'прийдіть',
+    isPerfective: true,
+  },
+  вийти: {
+    nonPast: ['вийду', 'вийдеш', 'вийде', 'вийдемо', 'вийдете', 'вийдуть'],
+    pastSg: 'вийшов',
+    pastPl: 'вийшли',
+    impTu: 'вийди',
+    impMes: 'вийдімо',
+    impJus: 'вийдіть',
+    isPerfective: true,
+  },
+  піти: {
+    nonPast: ['піду', 'підеш', 'піде', 'підемо', 'підете', 'підуть'],
+    pastSg: 'пішов',
+    pastPl: 'пішли',
+    impTu: 'піди',
+    impMes: 'підімо',
+    impJus: 'підіть',
+    isPerfective: true,
+  },
+  перейти: {
+    nonPast: ['перейду', 'перейдеш', 'перейде', 'перейдемо', 'перейдете', 'перейдуть'],
+    pastSg: 'перейшов',
+    pastPl: 'перейшли',
+    impTu: 'перейди',
+    impMes: 'перейдімо',
+    impJus: 'перейдіть',
+    isPerfective: true,
+  },
+  пройти: {
+    nonPast: ['пройду', 'пройдеш', 'пройде', 'пройдемо', 'пройдете', 'пройдуть'],
+    pastSg: 'пройшов',
+    pastPl: 'пройшли',
+    impTu: 'пройди',
+    impMes: 'пройдімо',
+    impJus: 'пройдіть',
+    isPerfective: true,
+  },
+  знайти: {
+    nonPast: ['знайду', 'знайдеш', 'знайде', 'знайдемо', 'знайдете', 'знайдуть'],
+    pastSg: 'знайшов',
+    pastPl: 'знайшли',
+    impTu: 'знайди',
+    impMes: 'знайдімо',
+    impJus: 'знайдіть',
+    isPerfective: true,
+  },
+  їхати: {
+    nonPast: ['їду', 'їдеш', 'їде', 'їдемо', 'їдете', 'їдуть'],
+    pastSg: 'їхав',
+    pastPl: 'їхали',
+    impTu: 'їдь',
+    impMes: 'їдьмо',
+    impJus: 'їдьте',
+    isPerfective: false,
+  },
+  приїхати: {
+    nonPast: ['приїду', 'приїдеш', 'приїде', 'приїдемо', 'приїдете', 'приїдуть'],
+    pastSg: 'приїхав',
+    pastPl: 'приїхали',
+    impTu: 'приїдь',
+    impMes: 'приїдьмо',
+    impJus: 'приїдьте',
+    isPerfective: true,
+  },
+  виїхати: {
+    nonPast: ['виїду', 'виїдеш', 'виїде', 'виїдемо', 'виїдете', 'виїдуть'],
+    pastSg: 'виїхав',
+    pastPl: 'виїхали',
+    impTu: 'виїдь',
+    impMes: 'виїдьмо',
+    impJus: 'виїдьте',
+    isPerfective: true,
+  },
+  доїхати: {
+    nonPast: ['доїду', 'доїдеш', 'доїде', 'доїдемо', 'доїдете', 'доїдуть'],
+    pastSg: 'доїхав',
+    pastPl: 'доїхали',
+    impTu: 'доїдь',
+    impMes: 'доїдьмо',
+    impJus: 'доїдьте',
+    isPerfective: true,
+  },
+  поїхати: {
+    nonPast: ['поїду', 'поїдеш', 'поїде', 'поїдемо', 'поїдете', 'поїдуть'],
+    pastSg: 'поїхав',
+    pastPl: 'поїхали',
+    impTu: 'поїдь',
+    impMes: 'поїдьмо',
+    impJus: 'поїдьте',
+    isPerfective: true,
+  },
+  переїхати: {
+    nonPast: ['переїду', 'переїдеш', 'переїде', 'переїдемо', 'переїдете', 'переїдуть'],
+    pastSg: 'переїхав',
+    pastPl: 'переїхали',
+    impTu: 'переїдь',
+    impMes: 'переїдьмо',
+    impJus: 'переїдьте',
+    isPerfective: true,
+  },
+  бігти: {
+    nonPast: ['біжу', 'біжиш', 'біжить', 'біжимо', 'біжите', 'біжать'],
+    pastSg: 'біг',
+    pastPl: 'бігли',
+    impTu: 'біжи',
+    impMes: 'біжімо',
+    impJus: 'біжіть',
+    isPerfective: false,
+  },
+  прибігти: {
+    nonPast: ['прибіжу', 'прибіжиш', 'прибіжить', 'прибіжимо', 'прибіжите', 'прибіжать'],
+    pastSg: 'прибіг',
+    pastPl: 'прибігли',
+    impTu: 'прибіжи',
+    impMes: 'прибіжімо',
+    impJus: 'прибіжіть',
+    isPerfective: true,
+  },
+  втекти: {
+    nonPast: ['втечу', 'втечеш', 'втече', 'втечемо', 'втечете', 'втечуть'],
+    pastSg: 'втік',
+    pastPl: 'втекли',
+    impTu: 'втечи',
+    impMes: 'втечімо',
+    impJus: 'втечіть',
+    isPerfective: true,
+  },
+  текти: {
+    nonPast: ['течу', 'течеш', 'тече', 'течемо', 'течете', 'течуть'],
+    pastSg: 'тік',
+    pastPl: 'текли',
+    impTu: 'течи',
+    impMes: 'течімо',
+    impJus: 'течіть',
+    isPerfective: false,
+  },
+  пекти: {
+    nonPast: ['печу', 'печеш', 'пече', 'печемо', 'печете', 'печуть'],
+    pastSg: 'пік',
+    pastPl: 'пекли',
+    impTu: 'печи',
+    impMes: 'печімо',
+    impJus: 'печіть',
+    isPerfective: false,
+  },
+  спекти: {
+    nonPast: ['спечу', 'спечеш', 'спече', 'спечемо', 'спечете', 'спечуть'],
+    pastSg: 'спік',
+    pastPl: 'спекли',
+    impTu: 'спечи',
+    impMes: 'спечімо',
+    impJus: 'спечіть',
+    isPerfective: true,
+  },
+  берегти: {
+    nonPast: ['бережу', 'бережеш', 'береже', 'бережемо', 'бережете', 'бережуть'],
+    pastSg: 'беріг',
+    pastPl: 'берегли',
+    impTu: 'бережи',
+    impMes: 'бережімо',
+    impJus: 'бережіть',
+    isPerfective: false,
+  },
+  стригти: {
+    nonPast: ['стрижу', 'стрижеш', 'стриже', 'стрижемо', 'стрижете', 'стрижуть'],
+    pastSg: 'стриг',
+    pastPl: 'стригли',
+    impTu: 'стрижи',
+    impMes: 'стрижімо',
+    impJus: 'стрижіть',
+    isPerfective: false,
+  },
+  підстригти: {
+    nonPast: ['підстрижу', 'підстрижеш', 'підстриже', 'підстрижемо', 'підстрижете', 'підстрижуть'],
+    pastSg: 'підстриг',
+    pastPl: 'підстригли',
+    impTu: 'підстрижи',
+    impMes: 'підстрижімо',
+    impJus: 'підстрижіть',
+    isPerfective: true,
+  },
+  лягти: {
+    nonPast: ['ляжу', 'ляжеш', 'ляже', 'ляжемо', 'ляжете', 'ляжуть'],
+    pastSg: 'ліг',
+    pastPl: 'лягли',
+    impTu: 'ляж',
+    impMes: 'ляжмо',
+    impJus: 'ляжте',
+    isPerfective: true,
+  },
+  сісти: {
+    nonPast: ['сяду', 'сядеш', 'сяде', 'сядемо', 'сядете', 'сядуть'],
+    pastSg: 'сів',
+    pastPl: 'сіли',
+    impTu: 'сядь',
+    impMes: 'сядьмо',
+    impJus: 'сядьте',
+    isPerfective: true,
+  },
+  пересісти: {
+    nonPast: ['пересяду', 'пересядеш', 'пересяде', 'пересядемо', 'пересядете', 'пересядуть'],
+    pastSg: 'пересів',
+    pastPl: 'пересіли',
+    impTu: 'пересядь',
+    impMes: 'пересядьмо',
+    impJus: 'пересядьте',
+    isPerfective: true,
+  },
+  спати: {
+    nonPast: ['сплю', 'спиш', 'спить', 'спимо', 'спите', 'сплять'],
+    pastSg: 'спав',
+    pastPl: 'спали',
+    impTu: 'спи',
+    impMes: 'спімо',
+    impJus: 'спіть',
+    isPerfective: false,
+  },
+  стояти: {
+    nonPast: ['стою', 'стоїш', 'стоїть', 'стоїмо', 'стоїте', 'стоять'],
+    pastSg: 'стояв',
+    pastPl: 'стояли',
+    impTu: 'стій',
+    impMes: 'стіймо',
+    impJus: 'стійте',
+    isPerfective: false,
+  },
+  боятися: {
+    nonPast: ['боюся', 'боїшся', 'боїться', 'боїмося', 'боїтеся', 'бояться'],
+    pastSg: 'боявся',
+    pastPl: 'боялися',
+    impTu: 'бійся',
+    impMes: 'біймося',
+    impJus: 'бійтеся',
+    isPerfective: false,
+  },
+  лежати: {
+    nonPast: ['лежу', 'лежиш', 'лежить', 'лежимо', 'лежите', 'лежать'],
+    pastSg: 'лежав',
+    pastPl: 'лежали',
+    impTu: 'лежи',
+    impMes: 'лежімо',
+    impJus: 'лежіть',
+    isPerfective: false,
+  },
+  сидіти: {
+    nonPast: ['сиджу', 'сидиш', 'сидить', 'сидимо', 'сидите', 'сидять'],
+    pastSg: 'сидів',
+    pastPl: 'сиділи',
+    impTu: 'сиди',
+    impMes: 'сидімо',
+    impJus: 'сидіть',
+    isPerfective: false,
+  },
+  летіти: {
+    nonPast: ['лечу', 'летиш', 'летить', 'летимо', 'летите', 'летять'],
+    pastSg: 'летів',
+    pastPl: 'летіли',
+    impTu: 'лети',
+    impMes: 'летімо',
+    impJus: 'летіть',
+    isPerfective: false,
+  },
+  прилетіти: {
+    nonPast: ['прилечу', 'прилетиш', 'прилетить', 'прилетимо', 'прилетите', 'прилетять'],
+    pastSg: 'прилетів',
+    pastPl: 'прилетіли',
+    impTu: 'прилети',
+    impMes: 'прилетімо',
+    impJus: 'прилетіть',
+    isPerfective: true,
+  },
+  вилетіти: {
+    nonPast: ['вилечу', 'вилетиш', 'вилетить', 'вилетимо', 'вилетите', 'вилетять'],
+    pastSg: 'вилетів',
+    pastPl: 'вилетіли',
+    impTu: 'вилети',
+    impMes: 'вилетімо',
+    impJus: 'вилетіть',
+    isPerfective: true,
+  },
+  гриміти: {
+    nonPast: ['гримлю', 'гримиш', 'гримить', 'гримимо', 'гримите', 'гримлять'],
+    pastSg: 'гримів',
+    pastPl: 'гриміли',
+    impTu: 'грими',
+    impMes: 'гримімо',
+    impJus: 'гриміть',
+    isPerfective: false,
+  },
+  боліти: {
+    nonPast: ['болю', 'болиш', 'болить', 'болимо', 'болите', 'болять'],
+    pastSg: 'болів',
+    pastPl: 'боліли',
+    impTu: 'не боли',
+    impMes: 'не болімо',
+    impJus: 'не боліть',
+    isPerfective: false,
+  },
+  горіти: {
+    nonPast: ['горю', 'гориш', 'горить', 'горимо', 'горите', 'горять'],
+    pastSg: 'горів',
+    pastPl: 'горіли',
+    impTu: 'гори',
+    impMes: 'горімо',
+    impJus: 'горіть',
+    isPerfective: false,
+  },
+  дивитися: {
+    nonPast: ['дивлюся', 'дивишся', 'дивиться', 'дивимося', 'дивитеся', 'дивляться'],
+    pastSg: 'дивився',
+    pastPl: 'дивилися',
+    impTu: 'дивися',
+    impMes: 'дивімося',
+    impJus: 'дивіться',
+    isPerfective: false,
+  },
+  подивитися: {
+    nonPast: ['подивлюся', 'подивишся', 'подивиться', 'подивимося', 'подивитеся', 'подивляться'],
+    pastSg: 'подивився',
+    pastPl: 'подивилися',
+    impTu: 'подивися',
+    impMes: 'подивімося',
+    impJus: 'подивіться',
+    isPerfective: true,
+  },
+  жити: {
+    nonPast: ['живу', 'живеш', 'живе', 'живемо', 'живете', 'живуть'],
+    pastSg: 'жив',
+    pastPl: 'жили',
+    impTu: 'живи',
+    impMes: 'живімо',
+    impJus: 'живіть',
+    isPerfective: false,
+  },
+  шити: {
+    nonPast: ['шию', 'шиєш', 'шиє', 'шиємо', 'шиєте', 'шиють'],
+    pastSg: 'шив',
+    pastPl: 'шили',
+    impTu: 'ший',
+    impMes: 'шиймо',
+    impJus: 'шийте',
+    isPerfective: false,
+  },
+  пошити: {
+    nonPast: ['пошию', 'пошиєш', 'пошиє', 'пошиємо', 'пошиєте', 'пошиють'],
+    pastSg: 'пошив',
+    pastPl: 'пошили',
+    impTu: 'поший',
+    impMes: 'пошиймо',
+    impJus: 'пошийте',
+    isPerfective: true,
+  },
+  мити: {
+    nonPast: ['мию', 'миєш', 'миє', 'миємо', 'миєте', 'миють'],
+    pastSg: 'мив',
+    pastPl: 'мили',
+    impTu: 'мий',
+    impMes: 'миймо',
+    impJus: 'мийте',
+    isPerfective: false,
+  },
+  вимити: {
+    nonPast: ['вимию', 'вимиєш', 'вимиє', 'вимиємо', 'вимиєте', 'вимиють'],
+    pastSg: 'вимив',
+    pastPl: 'вимили',
+    impTu: 'вимий',
+    impMes: 'вимиймо',
+    impJus: 'вимийте',
+    isPerfective: true,
+  },
+  вмитися: {
+    nonPast: ['вмиюся', 'вмиєшся', 'вмиється', 'вмиємося', 'вмиєтеся', 'вмиються'],
+    pastSg: 'вмився',
+    pastPl: 'вмилися',
+    impTu: 'вмийся',
+    impMes: 'вмиймося',
+    impJus: 'вмийтеся',
+    isPerfective: true,
+  },
+  пити: {
+    nonPast: ['п’ю', 'п’єш', 'п’є', 'п’ємо', 'п’єте', 'п’ють'],
+    pastSg: 'пив',
+    pastPl: 'пили',
+    impTu: 'пий',
+    impMes: 'пиймо',
+    impJus: 'пийте',
+    isPerfective: false,
+  },
+  випити: {
+    nonPast: ['вип’ю', 'вип’єш', 'вип’є', 'вип’ємо', 'вип’єте', 'вип’ють'],
+    pastSg: 'випив',
+    pastPl: 'випили',
+    impTu: 'випий',
+    impMes: 'випиймо',
+    impJus: 'випийте',
+    isPerfective: true,
+  },
+  налити: {
+    nonPast: ['наллю', 'наллєш', 'наллє', 'наллємо', 'наллєте', 'наллють'],
+    pastSg: 'налив',
+    pastPl: 'налили',
+    impTu: 'налий',
+    impMes: 'налиймо',
+    impJus: 'налийте',
+    isPerfective: true,
+  },
+  відкрити: {
+    nonPast: ['відкрию', 'відкриєш', 'відкриє', 'відкриємо', 'відкриєте', 'відкриють'],
+    pastSg: 'відкрив',
+    pastPl: 'відкрили',
+    impTu: 'відкрий',
+    impMes: 'відкриймо',
+    impJus: 'відкрийте',
+    isPerfective: true,
+  },
+  закрити: {
+    nonPast: ['закрию', 'закриєш', 'закриє', 'закриємо', 'закриєте', 'закриють'],
+    pastSg: 'закрив',
+    pastPl: 'закрили',
+    impTu: 'закрий',
+    impMes: 'закриймо',
+    impJus: 'закрийте',
+    isPerfective: true,
+  },
+  чути: {
+    nonPast: ['чую', 'чуєш', 'чує', 'чуємо', 'чуєте', 'чують'],
+    pastSg: 'чув',
+    pastPl: 'чули',
+    impTu: 'чуй',
+    impMes: 'чуймо',
+    impJus: 'чуйте',
+    isPerfective: false,
+  },
+  почути: {
+    nonPast: ['почую', 'почуєш', 'почує', 'почуємо', 'почуєте', 'почують'],
+    pastSg: 'почув',
+    pastPl: 'почули',
+    impTu: 'почуй',
+    impMes: 'почуймо',
+    impJus: 'почуйте',
+    isPerfective: true,
+  },
+  взутися: {
+    nonPast: ['взуюся', 'взуєшся', 'взується', 'взуємося', 'взуєтеся', 'взуються'],
+    pastSg: 'взувся',
+    pastPl: 'взулися',
+    impTu: 'взуйся',
+    impMes: 'взуймося',
+    impJus: 'взуйтеся',
+    isPerfective: true,
+  },
+  роззутися: {
+    nonPast: ['роззуюся', 'роззуєшся', 'роззується', 'роззуємося', 'роззуєтеся', 'роззуються'],
+    pastSg: 'роззувся',
+    pastPl: 'роззулися',
+    impTu: 'роззуйся',
+    impMes: 'роззуймося',
+    impJus: 'роззуйтеся',
+    isPerfective: true,
+  },
+  дути: {
+    nonPast: ['дму', 'дмеш', 'дме', 'дмемо', 'дмете', 'дмуть'],
+    pastSg: 'дув',
+    pastPl: 'дули',
+    impTu: 'дми',
+    impMes: 'дмімо',
+    impJus: 'дміть',
+    isPerfective: false,
+  },
+  забути: {
+    nonPast: ['забуду', 'забудеш', 'забуде', 'забудемо', 'забудете', 'забудуть'],
+    pastSg: 'забув',
+    pastPl: 'забули',
+    impTu: 'забудь',
+    impMes: 'забудьмо',
+    impJus: 'забудьте',
+    isPerfective: true,
+  },
+  прибути: {
+    nonPast: ['прибуду', 'прибудеш', 'прибуде', 'прибудемо', 'прибудете', 'прибудуть'],
+    pastSg: 'прибув',
+    pastPl: 'прибули',
+    impTu: 'прибудь',
+    impMes: 'прибудьмо',
+    impJus: 'прибудьте',
+    isPerfective: true,
+  },
+  відбутися: {
+    nonPast: ['відбудуся', 'відбудешся', 'відбудеться', 'відбудемося', 'відбудетеся', 'відбудуться'],
+    pastSg: 'відбувся',
+    pastPl: 'відбулися',
+    impTu: 'відбудься',
+    impMes: 'відбудьмося',
+    impJus: 'відбудьтеся',
+    isPerfective: true,
+  },
+  надіти: {
+    nonPast: ['надіну', 'надінеш', 'надіне', 'надінемо', 'надінете', 'надінуть'],
+    pastSg: 'надів',
+    pastPl: 'наділи',
+    impTu: 'надінь',
+    impMes: 'надіньмо',
+    impJus: 'надіньте',
+    isPerfective: true,
+  },
+  відпочити: {
+    nonPast: ['відпочину', 'відпочинеш', 'відпочине', 'відпочинемо', 'відпочинете', 'відпочинуть'],
+    pastSg: 'відпочив',
+    pastPl: 'відпочили',
+    impTu: 'відпочинь',
+    impMes: 'відпочиньмо',
+    impJus: 'відпочиньте',
+    isPerfective: true,
+  },
+  зустріти: {
+    nonPast: ['зустріну', 'зустрінеш', 'зустріне', 'зустрінемо', 'зустрінете', 'зустрінуть'],
+    pastSg: 'зустрів',
+    pastPl: 'зустріли',
+    impTu: 'зустрінь',
+    impMes: 'зустріньмо',
+    impJus: 'зустріньте',
+    isPerfective: true,
+  },
+  зустрітися: {
+    nonPast: ['зустрінуся', 'зустрінешся', 'зустрінеться', 'зустрінемося', 'зустрінетеся', 'зустрінуться'],
+    pastSg: 'зустрівся',
+    pastPl: 'зустрілися',
+    impTu: 'зустрінься',
+    impMes: 'зустріньмося',
+    impJus: 'зустріньтеся',
+    isPerfective: true,
+  },
+  встати: {
+    nonPast: ['встану', 'встанеш', 'встане', 'встанемо', 'встанете', 'встануть'],
+    pastSg: 'встав',
+    pastPl: 'встали',
+    impTu: 'встань',
+    impMes: 'встаньмо',
+    impJus: 'встаньте',
+    isPerfective: true,
+  },
+  стати: {
+    nonPast: ['стану', 'станеш', 'стане', 'станемо', 'станете', 'стануть'],
+    pastSg: 'став',
+    pastPl: 'стали',
+    impTu: 'стань',
+    impMes: 'станьмо',
+    impJus: 'станьте',
+    isPerfective: true,
+  },
+  статися: {
+    nonPast: ['стануся', 'станешся', 'станеться', 'станемося', 'станетеся', 'стануться'],
+    pastSg: 'стався',
+    pastPl: 'сталися',
+    impTu: 'станься',
+    impMes: 'станьмося',
+    impJus: 'станьтеся',
+    isPerfective: true,
+  },
+  почати: {
+    nonPast: ['почну', 'почнеш', 'почне', 'почнемо', 'почнете', 'почнуть'],
+    pastSg: 'почав',
+    pastPl: 'почали',
+    impTu: 'почни',
+    impMes: 'почнімо',
+    impJus: 'почніть',
+    isPerfective: true,
+  },
+  взяти: {
+    nonPast: ['візьму', 'візьмеш', 'візьме', 'візьмемо', 'візьмете', 'візьмуть'],
+    pastSg: 'взяв',
+    pastPl: 'взяли',
+    impTu: 'візьми',
+    impMes: 'візьмімо',
+    impJus: 'візьміть',
+    isPerfective: true,
+  },
+  зайняти: {
+    nonPast: ['займу', 'займеш', 'займе', 'займемо', 'займете', 'займуть'],
+    pastSg: 'зайняв',
+    pastPl: 'зайняли',
+    impTu: 'займи',
+    impMes: 'займімо',
+    impJus: 'займіть',
+    isPerfective: true,
+  },
+  зняти: {
+    nonPast: ['зніму', 'знімеш', 'зніме', 'знімемо', 'знімете', 'знімуть'],
+    pastSg: 'зняв',
+    pastPl: 'зняли',
+    impTu: 'зніми',
+    impMes: 'знімімо',
+    impJus: 'зніміть',
+    isPerfective: true,
+  },
+  обійняти: {
+    nonPast: ['обійму', 'обіймеш', 'обійме', 'обіймемо', 'обіймете', 'обіймуть'],
+    pastSg: 'обійняв',
+    pastPl: 'обійняли',
+    impTu: 'обійми',
+    impMes: 'обіймімо',
+    impJus: 'обійміть',
+    isPerfective: true,
+  },
+  брати: {
+    nonPast: ['беру', 'береш', 'бере', 'беремо', 'берете', 'беруть'],
+    pastSg: 'брав',
+    pastPl: 'брали',
+    impTu: 'бери',
+    impMes: 'берімо',
+    impJus: 'беріть',
+    isPerfective: false,
+  },
+  обрати: {
+    nonPast: ['оберу', 'обереш', 'обере', 'оберемо', 'оберете', 'оберуть'],
+    pastSg: 'обрав',
+    pastPl: 'обрали',
+    impTu: 'обери',
+    impMes: 'оберімо',
+    impJus: 'оберіть',
+    isPerfective: true,
+  },
+  вибрати: {
+    nonPast: ['виберу', 'вибереш', 'вибере', 'виберемо', 'виберете', 'виберуть'],
+    pastSg: 'вибрав',
+    pastPl: 'вибрали',
+    impTu: 'вибери',
+    impMes: 'виберімо',
+    impJus: 'виберіть',
+    isPerfective: true,
+  },
+  прибрати: {
+    nonPast: ['приберу', 'прибереш', 'прибере', 'приберемо', 'приберете', 'приберуть'],
+    pastSg: 'прибрав',
+    pastPl: 'прибрали',
+    impTu: 'прибери',
+    impMes: 'приберімо',
+    impJus: 'приберіть',
+    isPerfective: true,
+  },
+  прати: {
+    nonPast: ['перу', 'переш', 'пере', 'перемо', 'перете', 'перуть'],
+    pastSg: 'прав',
+    pastPl: 'прали',
+    impTu: 'пери',
+    impMes: 'перімо',
+    impJus: 'періть',
+    isPerfective: false,
+  },
+  випрати: {
+    nonPast: ['виперу', 'випереш', 'випере', 'виперемо', 'виперете', 'виперуть'],
+    pastSg: 'виправ',
+    pastPl: 'випрали',
+    impTu: 'випери',
+    impMes: 'виперімо',
+    impJus: 'виперіть',
+    isPerfective: true,
+  },
+  надіслати: {
+    nonPast: ['надішлю', 'надішлеш', 'надішле', 'надішлемо', 'надішлете', 'надішлють'],
+    pastSg: 'надіслав',
+    pastPl: 'надіслали',
+    impTu: 'надішли',
+    impMes: 'надішлімо',
+    impJus: 'надішліть',
+    isPerfective: true,
+  },
+  прислати: {
+    nonPast: ['пришлю', 'пришлеш', 'пришле', 'пришлемо', 'пришлете', 'пришлють'],
+    pastSg: 'прислав',
+    pastPl: 'прислали',
+    impTu: 'пришли',
+    impMes: 'пришлімо',
+    impJus: 'пришліть',
+    isPerfective: true,
+  },
+  писати: {
+    nonPast: ['пишу', 'пишеш', 'пише', 'пишемо', 'пишете', 'пишуть'],
+    pastSg: 'писав',
+    pastPl: 'писали',
+    impTu: 'пиши',
+    impMes: 'пишімо',
+    impJus: 'пишіть',
+    isPerfective: false,
+  },
+  написати: {
+    nonPast: ['напишу', 'напишеш', 'напише', 'напишемо', 'напишете', 'напишуть'],
+    pastSg: 'написав',
+    pastPl: 'написали',
+    impTu: 'напиши',
+    impMes: 'напишімо',
+    impJus: 'напишіть',
+    isPerfective: true,
+  },
+  записати: {
+    nonPast: ['запишу', 'запишеш', 'запише', 'запишемо', 'запишете', 'запишуть'],
+    pastSg: 'записав',
+    pastPl: 'записали',
+    impTu: 'запиши',
+    impMes: 'запишімо',
+    impJus: 'запишіть',
+    isPerfective: true,
+  },
+  підписати: {
+    nonPast: ['підпишу', 'підпишеш', 'підпише', 'підпишемо', 'підпишете', 'підпишуть'],
+    pastSg: 'підписав',
+    pastPl: 'підписали',
+    impTu: 'підпиши',
+    impMes: 'підпишімо',
+    impJus: 'підпишіть',
+    isPerfective: true,
+  },
+  казати: {
+    nonPast: ['кажу', 'кажеш', 'каже', 'кажемо', 'кажете', 'кажуть'],
+    pastSg: 'казав',
+    pastPl: 'казали',
+    impTu: 'кажи',
+    impMes: 'кажімо',
+    impJus: 'кажіть',
+    isPerfective: false,
+  },
+  сказати: {
+    nonPast: ['скажу', 'скажеш', 'скаже', 'скажемо', 'скажете', 'скажуть'],
+    pastSg: 'сказав',
+    pastPl: 'сказали',
+    impTu: 'скажи',
+    impMes: 'скажімо',
+    impJus: 'скажіть',
+    isPerfective: true,
+  },
+  показати: {
+    nonPast: ['покажу', 'покажеш', 'покаже', 'покажемо', 'покажете', 'покажуть'],
+    pastSg: 'показав',
+    pastPl: 'показали',
+    impTu: 'покажи',
+    impMes: 'покажімо',
+    impJus: 'покажіть',
+    isPerfective: true,
+  },
+  різати: {
+    nonPast: ['ріжу', 'ріжеш', 'ріже', 'ріжемо', 'ріжете', 'ріжуть'],
+    pastSg: 'різав',
+    pastPl: 'різали',
+    impTu: 'ріж',
+    impMes: 'ріжмо',
+    impJus: 'ріжте',
+    isPerfective: false,
+  },
+  нарізати: {
+    nonPast: ['наріжу', 'наріжеш', 'наріже', 'наріжемо', 'наріжете', 'наріжуть'],
+    pastSg: 'нарізав',
+    pastPl: 'нарізали',
+    impTu: 'наріж',
+    impMes: 'наріжмо',
+    impJus: 'наріжте',
+    isPerfective: true,
+  },
+  плакати: {
+    nonPast: ['плачу', 'плачеш', 'плаче', 'плачемо', 'плачете', 'плачуть'],
+    pastSg: 'плакав',
+    pastPl: 'плакали',
+    impTu: 'не плач',
+    impMes: 'не плачмо',
+    impJus: 'не плачте',
+    isPerfective: false,
+  },
+  причесатися: {
+    nonPast: ['причешуся', 'причешешся', 'причешеться', 'причешемося', 'причешетеся', 'причешуться'],
+    pastSg: 'причесався',
+    pastPl: 'причесалися',
+    impTu: 'причешися',
+    impMes: 'причешімося',
+    impJus: 'причешіться',
+    isPerfective: true,
+  },
+  'в’язати': {
+    nonPast: ['в’яжу', 'в’яжеш', 'в’яже', 'в’яжемо', 'в’яжете', 'в’яжуть'],
+    pastSg: 'в’язав',
+    pastPl: 'в’язали',
+    impTu: 'в’яжи',
+    impMes: 'в’яжімо',
+    impJus: 'в’яжіть',
+    isPerfective: false,
+  },
+  'розв’язати': {
+    nonPast: ['розв’яжу', 'розв’яжеш', 'розв’яже', 'розв’яжемо', 'розв’яжете', 'розв’яжуть'],
+    pastSg: 'розв’язав',
+    pastPl: 'розв’язали',
+    impTu: 'розв’яжи',
+    impMes: 'розв’яжімо',
+    impJus: 'розв’яжіть',
+    isPerfective: true,
+  },
+  покласти: {
+    nonPast: ['покладу', 'покладеш', 'покладе', 'покладемо', 'покладете', 'покладуть'],
+    pastSg: 'поклав',
+    pastPl: 'поклали',
+    impTu: 'поклади',
+    impMes: 'покладімо',
+    impJus: 'покладіть',
+    isPerfective: true,
+  },
+  скласти: {
+    nonPast: ['складу', 'складеш', 'складе', 'складемо', 'складете', 'складуть'],
+    pastSg: 'склав',
+    pastPl: 'склали',
+    impTu: 'склади',
+    impMes: 'складімо',
+    impJus: 'складіть',
+    isPerfective: true,
+  },
+  перекласти: {
+    nonPast: ['перекладу', 'перекладеш', 'перекладе', 'перекладемо', 'перекладете', 'перекладуть'],
+    pastSg: 'переклав',
+    pastPl: 'переклали',
+    impTu: 'переклади',
+    impMes: 'перекладімо',
+    impJus: 'перекладіть',
+    isPerfective: true,
+  },
+  відкласти: {
+    nonPast: ['відкладу', 'відкладеш', 'відкладе', 'відкладемо', 'відкладете', 'відкладуть'],
+    pastSg: 'відклав',
+    pastPl: 'відклали',
+    impTu: 'відклади',
+    impMes: 'відкладімо',
+    impJus: 'відкладіть',
+    isPerfective: true,
+  },
+  провести: {
+    nonPast: ['проведу', 'проведеш', 'проведе', 'проведемо', 'проведете', 'проведуть'],
+    pastSg: 'провів',
+    pastPl: 'провели',
+    impTu: 'проведи',
+    impMes: 'проведімо',
+    impJus: 'проведіть',
+    isPerfective: true,
+  },
+  підвестися: {
+    nonPast: ['підведуся', 'підведешся', 'підведеться', 'підведемося', 'підведетеся', 'підведуться'],
+    pastSg: 'підвівся',
+    pastPl: 'підвелися',
+    impTu: 'підведися',
+    impMes: 'підведімося',
+    impJus: 'підведіться',
+    isPerfective: true,
+  },
+  рости: {
+    nonPast: ['росту', 'ростеш', 'росте', 'ростемо', 'ростете', 'ростуть'],
+    pastSg: 'ріс',
+    pastPl: 'росли',
+    impTu: 'рости',
+    impMes: 'ростімо',
+    impJus: 'ростіть',
+    isPerfective: false,
+  },
+  вирости: {
+    nonPast: ['виросту', 'виростеш', 'виросте', 'виростемо', 'виростете', 'виростуть'],
+    pastSg: 'виріс',
+    pastPl: 'виросли',
+    impTu: 'вирости',
+    impMes: 'виростімо',
+    impJus: 'виростіть',
+    isPerfective: true,
+  },
+  цвісти: {
+    nonPast: ['цвіту', 'цвітеш', 'цвіте', 'цвітемо', 'цвітете', 'цвітуть'],
+    pastSg: 'цвів',
+    pastPl: 'цвіли',
+    impTu: 'цвіти',
+    impMes: 'цвітімо',
+    impJus: 'цвітіть',
+    isPerfective: false,
+  },
+  нести: {
+    nonPast: ['несу', 'несеш', 'несе', 'несемо', 'несете', 'несуть'],
+    pastSg: 'ніс',
+    pastPl: 'несли',
+    impTu: 'неси',
+    impMes: 'несімо',
+    impJus: 'несіть',
+    isPerfective: false,
+  },
+  принести: {
+    nonPast: ['принесу', 'принесеш', 'принесе', 'принесемо', 'принесете', 'принесуть'],
+    pastSg: 'приніс',
+    pastPl: 'принесли',
+    impTu: 'принеси',
+    impMes: 'принесімо',
+    impJus: 'принесіть',
+    isPerfective: true,
+  },
+  віднести: {
+    nonPast: ['віднесу', 'віднесеш', 'віднесе', 'віднесемо', 'віднесете', 'віднесуть'],
+    pastSg: 'відніс',
+    pastPl: 'віднесли',
+    impTu: 'віднеси',
+    impMes: 'віднесімо',
+    impJus: 'віднесіть',
+    isPerfective: true,
+  },
+  везти: {
+    nonPast: ['везу', 'везеш', 'везе', 'веземо', 'везете', 'везуть'],
+    pastSg: 'віз',
+    pastPl: 'везли',
+    impTu: 'вези',
+    impMes: 'везімо',
+    impJus: 'везіть',
+    isPerfective: false,
+  },
+  привезти: {
+    nonPast: ['привезу', 'привезеш', 'привезе', 'привеземо', 'привезете', 'привезуть'],
+    pastSg: 'привіз',
+    pastPl: 'привезли',
+    impTu: 'привези',
+    impMes: 'привезімо',
+    impJus: 'привезіть',
+    isPerfective: true,
+  },
+  відвезти: {
+    nonPast: ['відвезу', 'відвезеш', 'відвезе', 'відвеземо', 'відвезете', 'відвезуть'],
+    pastSg: 'відвіз',
+    pastPl: 'відвезли',
+    impTu: 'відвези',
+    impMes: 'відвезімо',
+    impJus: 'відвезіть',
+    isPerfective: true,
+  },
+  лізти: {
+    nonPast: ['лізу', 'лізеш', 'лізе', 'ліземо', 'лізете', 'лізуть'],
+    pastSg: 'ліз',
+    pastPl: 'лізли',
+    impTu: 'лізь',
+    impMes: 'лізьмо',
+    impJus: 'лізьте',
+    isPerfective: false,
+  },
+  плисти: {
+    nonPast: ['пливу', 'пливеш', 'пливе', 'пливемо', 'пливете', 'пливуть'],
+    pastSg: 'плив',
+    pastPl: 'пливли',
+    impTu: 'пливи',
+    impMes: 'пливімо',
+    impJus: 'пливіть',
+    isPerfective: false,
+  },
+  терти: {
+    nonPast: ['тру', 'треш', 'тре', 'тремо', 'трете', 'труть'],
+    pastSg: 'тер',
+    pastPl: 'терли',
+    impTu: 'три',
+    impMes: 'трімо',
+    impJus: 'тріть',
+    isPerfective: false,
+  },
+  мерзнути: {
+    nonPast: ['мерзну', 'мерзнеш', 'мерзне', 'мерзнемо', 'мерзнете', 'мерзнуть'],
+    pastSg: 'мерз',
+    pastPl: 'мерзли',
+    impTu: 'не мерзни',
+    impMes: 'не мерзнімо',
+    impJus: 'не мерзніть',
+    isPerfective: false,
+  },
+  замерзнути: {
+    nonPast: ['замерзну', 'замерзнеш', 'замерзне', 'замерзнемо', 'замерзнете', 'замерзнуть'],
+    pastSg: 'замерз',
+    pastPl: 'замерзли',
+    impTu: 'не замерзни',
+    impMes: 'не замерзнімо',
+    impJus: 'не замерзніть',
+    isPerfective: true,
+  },
+  сохнути: {
+    nonPast: ['сохну', 'сохнеш', 'сохне', 'сохнемо', 'сохнете', 'сохнуть'],
+    pastSg: 'сох',
+    pastPl: 'сохли',
+    impTu: 'сохни',
+    impMes: 'сохнімо',
+    impJus: 'сохніть',
+    isPerfective: false,
+  },
+  стигнути: {
+    nonPast: ['стигну', 'стигнеш', 'стигне', 'стигнемо', 'стигнете', 'стигнуть'],
+    pastSg: 'стиг',
+    pastPl: 'стигли',
+    impTu: 'стигни',
+    impMes: 'стигнімо',
+    impJus: 'стигніть',
+    isPerfective: false,
+  },
+  встигнути: {
+    nonPast: ['встигну', 'встигнеш', 'встигне', 'встигнемо', 'встигнете', 'встигнуть'],
+    pastSg: 'встиг',
+    pastPl: 'встигли',
+    impTu: 'встигни',
+    impMes: 'встигнімо',
+    impJus: 'встигніть',
+    isPerfective: true,
+  },
+  досягти: {
+    nonPast: ['досягну', 'досягнеш', 'досягне', 'досягнемо', 'досягнете', 'досягнуть'],
+    pastSg: 'досяг',
+    pastPl: 'досягли',
+    impTu: 'досягни',
+    impMes: 'досягнімо',
+    impJus: 'досягніть',
+    isPerfective: true,
+  },
+  наїстися: {
+    nonPast: ['наїмся', 'наїсися', 'наїсться', 'наїмося', 'наїстеся', 'наїдяться'],
+    pastSg: 'наївся',
+    pastPl: 'наїлися',
+    impTu: 'наїжся',
+    impMes: 'наїжмося',
+    impJus: 'наїжтеся',
+    isPerfective: true,
+  },
+  щебетати: {
+    nonPast: ['щебечу', 'щебечеш', 'щебече', 'щебечемо', 'щебечете', 'щебечуть'],
+    pastSg: 'щебетав',
+    pastPl: 'щебетали',
+    impTu: 'щебечи',
+    impMes: 'щебечімо',
+    impJus: 'щебечіть',
+    isPerfective: false,
+  },
+};
+
+const PERFECTIVE_UK_VERBS = new Set([
+  'народитися',
+  'одружитися',
+  'познайомитися',
+  'запросити',
+  'відвідати',
+  'помиритися',
+  'пробачити',
+  'вибачитися',
+  'подякувати',
+  'привітати',
+  'скучити',
+  'заснути',
+  'прокинутися',
+  'встати',
+  'вмитися',
+  'сісти',
+  'лягти',
+  'вичистити',
+  'прибрати',
+  'вимити',
+  'побудувати',
+  'покласти',
+  'взяти',
+  'викинути',
+  'заселитися',
+  'з’їсти',
+  'випити',
+  'приготувати',
+  'зварити',
+  'спекти',
+  'змішати',
+  'скуштувати',
+  'пригостити',
+  'замовити',
+  'налити',
+  'розігріти',
+  'наїстися',
+  'купити',
+  'заплатити',
+  'оплатити',
+  'обрати',
+  'вибрати',
+  'зекономити',
+  'витратити',
+  'поміняти',
+  'позичити',
+  'зважити',
+  'запакувати',
+  'знизити',
+  'попрацювати',
+  'зробити',
+  'створити',
+  'запланувати',
+  'досягти',
+  'підписати',
+  'працевлаштувати',
+  'влаштуватися',
+  'перевірити',
+  'виправити',
+  'полагодити',
+  'використати',
+  'надіслати',
+  'прислати',
+  'приїхати',
+  'виїхати',
+  'доїхати',
+  'повернутися',
+  'прилетіти',
+  'вилетіти',
+  'прибігти',
+  'втекти',
+  'зупинитися',
+  'повернути',
+  'привезти',
+  'відвезти',
+  'принести',
+  'віднести',
+  'зустрітися',
+  'зустріти',
+  'знайти',
+  'зачекати',
+  'дочекатися',
+  'зателефонувати',
+  'прогулятися',
+  'показати',
+  'побачити',
+  'подивитися',
+  'почути',
+  'послухати',
+  'захистити',
+  'врятувати',
+  'зареєструватися',
+  'повідомити',
+  'вивчити',
+  'навчити',
+  'прочитати',
+  'написати',
+  'записати',
+  'порахувати',
+  'дізнатися',
+  'запитати',
+  'повторити',
+  'пояснити',
+  'перекласти',
+  'вимовити',
+  'розповісти',
+  'сказати',
+  'пригадати',
+  'забути',
+  'намалювати',
+  'скласти',
+  'посадити',
+  'запалити',
+  'замерзнути',
+  'затопити',
+  'захворіти',
+  'одужати',
+  'вилікувати',
+  'вдихнути',
+  'видихнути',
+  'відпочити',
+  'втомитися',
+  'виміряти',
+  'поранити',
+  'зламати',
+  'розслабити',
+  'розслабитися',
+  'одягнутися',
+  'роздягнутися',
+  'переодягнутися',
+  'взутися',
+  'роззутися',
+  'надіти',
+  'зняти',
+  'випрати',
+  'випрасувати',
+  'пошити',
+  'причесатися',
+  'підстригтися',
+  'оглянути',
+  'сфотографувати',
+  'заблукати',
+  'провести',
+  'спакувати',
+  'скупатися',
+  'закінчитися',
+  'завершити',
+  'зайняти',
+  'встигнути',
+  'відкласти',
+  'підготувати',
+  'підготуватися',
+  'залишитися',
+  'залишити',
+  'змінитися',
+  'відбутися',
+  'трапитися',
+  'статися',
+  'захотіти',
+  'полюбити',
+  'подумати',
+  'придумати',
+  'спробувати',
+  'постаратися',
+  'вирішити',
+  'розв’язати',
+  'зацікавити',
+  'побажати',
+  'віддати',
+]);
+
+function addUkReflexiveToParadigm(p: UkVerbParadigm): UkVerbParadigm {
+  const attachRefl = (form: string, isThirdSg: boolean) => {
+    if (form.endsWith('ся') || form.endsWith('сь')) return form;
+    if (isThirdSg && (form.endsWith('є') || form.endsWith('е'))) {
+      return `${form}ться`;
+    }
+    return `${form}ся`;
+  };
+  return {
+    nonPast: [
+      attachRefl(p.nonPast[0], false),
+      attachRefl(p.nonPast[1], false),
+      attachRefl(p.nonPast[2], true),
+      attachRefl(p.nonPast[3], false),
+      attachRefl(p.nonPast[4], false),
+      attachRefl(p.nonPast[5], false),
+    ],
+    pastSg: attachRefl(p.pastSg, false),
+    pastPl: attachRefl(p.pastPl, false),
+    impTu: attachRefl(p.impTu, false),
+    impMes: attachRefl(p.impMes, false),
+    impJus: attachRefl(p.impJus, false),
+    isPerfective: p.isPerfective,
+  };
+}
+
+function buildUkrainianVerbParadigm(infUk: string): UkVerbParadigm {
+  const lower = infUk.trim().toLowerCase();
+  if (EXACT_UK_VERB_PARADIGMS[lower]) {
+    return EXACT_UK_VERB_PARADIGMS[lower];
+  }
+
+  const isRefl = lower.endsWith('тися') || lower.endsWith('тись');
+  const baseInf = isRefl ? lower.replace(/(тися|тись)$/, 'ти') : lower;
+
+  if (EXACT_UK_VERB_PARADIGMS[baseInf]) {
+    const baseP = EXACT_UK_VERB_PARADIGMS[baseInf];
+    const p = isRefl ? addUkReflexiveToParadigm(baseP) : baseP;
+    return {
+      ...p,
+      isPerfective: p.isPerfective || PERFECTIVE_UK_VERBS.has(lower),
+    };
+  }
+
+  const isPerf = PERFECTIVE_UK_VERBS.has(lower) || PERFECTIVE_UK_VERBS.has(baseInf);
+  let baseParadigm: UkVerbParadigm;
+
+  if (baseInf === 'розповісти' || baseInf === 'відповісти') {
+    const pref = baseInf.slice(0, -3); // розпові / відпові
+    baseParadigm = {
+      nonPast: [
+        `${pref}м`,
+        `${pref}си`,
+        `${pref}сть`,
+        `${pref}мо`,
+        `${pref}сте`,
+        `${pref}дять`,
+      ],
+      pastSg: `${pref}в`,
+      pastPl: `${pref}ли`,
+      impTu: `${pref}ж`,
+      impMes: `${pref}жмо`,
+      impJus: `${pref}жте`,
+      isPerfective: true,
+    };
+  } else if (
+    baseInf.endsWith('увати') &&
+    baseInf !== 'почувати' &&
+    baseInf !== 'відчувати' &&
+    baseInf !== 'відбувати' &&
+    baseInf !== 'забувати' &&
+    baseInf !== 'прибувати' &&
+    baseInf !== 'перебувати' &&
+    baseInf !== 'взувати' &&
+    baseInf !== 'роззувати'
+  ) {
+    const stem = baseInf.slice(0, -5);
+    baseParadigm = {
+      nonPast: [
+        `${stem}ую`,
+        `${stem}уєш`,
+        `${stem}ує`,
+        `${stem}уємо`,
+        `${stem}уєте`,
+        `${stem}ують`,
+      ],
+      pastSg: `${stem}ував`,
+      pastPl: `${stem}ували`,
+      impTu: `${stem}уй`,
+      impMes: `${stem}уймо`,
+      impJus: `${stem}уйте`,
+      isPerfective: isPerf,
+    };
+  } else if (baseInf.endsWith('ювати')) {
+    const stem = baseInf.slice(0, -5);
+    baseParadigm = {
+      nonPast: [
+        `${stem}юю`,
+        `${stem}юєш`,
+        `${stem}ює`,
+        `${stem}юємо`,
+        `${stem}юєте`,
+        `${stem}юють`,
+      ],
+      pastSg: `${stem}ював`,
+      pastPl: `${stem}ювали`,
+      impTu: `${stem}юй`,
+      impMes: `${stem}юймо`,
+      impJus: `${stem}юйте`,
+      isPerfective: isPerf,
+    };
+  } else if (
+    baseInf === 'давати' ||
+    baseInf === 'продавати' ||
+    baseInf === 'подавати' ||
+    baseInf === 'вставати' ||
+    baseInf === 'ставати'
+  ) {
+    const stem = baseInf.slice(0, -4); // да, прода, пода, вста, ста
+    baseParadigm = {
+      nonPast: [
+        `${stem}ю`,
+        `${stem}єш`,
+        `${stem}є`,
+        `${stem}ємо`,
+        `${stem}єте`,
+        `${stem}ють`,
+      ],
+      pastSg: `${stem}вав`,
+      pastPl: `${stem}вали`,
+      impTu: `${stem}вай`,
+      impMes: `${stem}ваймо`,
+      impJus: `${stem}вайте`,
+      isPerfective: isPerf,
+    };
+  } else if (baseInf.endsWith('ати')) {
+    const stem = baseInf.slice(0, -2); // ends with 'а'
+    baseParadigm = {
+      nonPast: [
+        `${stem}ю`,
+        `${stem}єш`,
+        `${stem}є`,
+        `${stem}ємо`,
+        `${stem}єте`,
+        `${stem}ють`,
+      ],
+      pastSg: `${stem}в`,
+      pastPl: `${stem}ли`,
+      impTu: `${stem}й`,
+      impMes: `${stem}ймо`,
+      impJus: `${stem}йте`,
+      isPerfective: isPerf,
+    };
+  } else if (baseInf.endsWith('яти')) {
+    const beforeYa = baseInf.slice(0, -3);
+    const endsInVowel = /[аеєиіїоуюя]$/.test(beforeYa);
+    const presStem = endsInVowel ? beforeYa : `${beforeYa}я`;
+    baseParadigm = {
+      nonPast: [
+        `${presStem}ю`,
+        `${presStem}єш`,
+        `${presStem}є`,
+        `${presStem}ємо`,
+        `${presStem}єте`,
+        `${presStem}ють`,
+      ],
+      pastSg: `${beforeYa}яв`,
+      pastPl: `${beforeYa}яли`,
+      impTu: `${presStem}й`,
+      impMes: `${presStem}ймо`,
+      impJus: `${presStem}йте`,
+      isPerfective: isPerf,
+    };
+  } else if (baseInf.endsWith('іти')) {
+    const stem = baseInf.slice(0, -3);
+    baseParadigm = {
+      nonPast: [
+        `${stem}ію`,
+        `${stem}ієш`,
+        `${stem}іє`,
+        `${stem}іємо`,
+        `${stem}ієте`,
+        `${stem}іють`,
+      ],
+      pastSg: `${stem}ів`,
+      pastPl: `${stem}іли`,
+      impTu: `${stem}ій`,
+      impMes: `${stem}іймо`,
+      impJus: `${stem}ійте`,
+      isPerfective: isPerf,
+    };
+  } else if (baseInf.endsWith('їти')) {
+    const stem = baseInf.slice(0, -3);
+    baseParadigm = {
+      nonPast: [
+        `${stem}ю`,
+        `${stem}їш`,
+        `${stem}їть`,
+        `${stem}їмо`,
+        `${stem}їте`,
+        `${stem}ять`,
+      ],
+      pastSg: `${stem}їв`,
+      pastPl: `${stem}їли`,
+      impTu: `${stem}й`,
+      impMes: `${stem}ймо`,
+      impJus: `${stem}йте`,
+      isPerfective: isPerf,
+    };
+  } else if (baseInf.endsWith('нути')) {
+    const stem = baseInf.slice(0, -4);
+    baseParadigm = {
+      nonPast: [
+        `${stem}ну`,
+        `${stem}неш`,
+        `${stem}не`,
+        `${stem}немо`,
+        `${stem}нете`,
+        `${stem}нуть`,
+      ],
+      pastSg: `${stem}нув`,
+      pastPl: `${stem}нули`,
+      impTu: `${stem}ни`,
+      impMes: `${stem}німо`,
+      impJus: `${stem}ніть`,
+      isPerfective: isPerf,
+    };
+  } else if (baseInf.endsWith('ити')) {
+    const stem = baseInf.slice(0, -3);
+    let firstSg = `${stem}ю`;
+    let thirdPl = `${stem}ять`;
+
+    if (/[бпвмф]$/.test(stem)) {
+      firstSg = `${stem}лю`;
+      thirdPl = `${stem}лять`;
+    } else if (stem.endsWith('ст')) {
+      firstSg = `${stem.slice(0, -2)}щу`;
+      thirdPl = `${stem}ять`;
+    } else if (stem.endsWith('зд')) {
+      firstSg = `${stem.slice(0, -2)}жджу`;
+      thirdPl = `${stem}ять`;
+    } else if (stem.endsWith('д')) {
+      firstSg = `${stem.slice(0, -1)}джу`;
+      thirdPl = `${stem}ять`;
+    } else if (stem.endsWith('т')) {
+      firstSg = `${stem.slice(0, -1)}чу`;
+      thirdPl = `${stem}ять`;
+    } else if (stem.endsWith('з')) {
+      firstSg = `${stem.slice(0, -1)}жу`;
+      thirdPl = `${stem}ять`;
+    } else if (stem.endsWith('с')) {
+      firstSg = `${stem.slice(0, -1)}шу`;
+      thirdPl = `${stem}ять`;
+    } else if (/[жчшщ]$/.test(stem)) {
+      firstSg = `${stem}у`;
+      thirdPl = `${stem}ать`;
+    }
+
+    baseParadigm = {
+      nonPast: [
+        firstSg,
+        `${stem}иш`,
+        `${stem}ить`,
+        `${stem}имо`,
+        `${stem}ите`,
+        thirdPl,
+      ],
+      pastSg: `${stem}ив`,
+      pastPl: `${stem}или`,
+      impTu: `${stem}и`,
+      impMes: `${stem}імо`,
+      impJus: `${stem}іть`,
+      isPerfective: isPerf,
+    };
+  } else {
+    const stem = baseInf.replace(/ти$/, '');
+    baseParadigm = {
+      nonPast: [
+        `${stem}у`,
+        `${stem}еш`,
+        `${stem}е`,
+        `${stem}емо`,
+        `${stem}ете`,
+        `${stem}уть`,
+      ],
+      pastSg: `${stem}в`,
+      pastPl: `${stem}ли`,
+      impTu: `${stem}и`,
+      impMes: `${stem}імо`,
+      impJus: `${stem}іть`,
+      isPerfective: isPerf,
+    };
+  }
+
+  return isRefl ? addUkReflexiveToParadigm(baseParadigm) : baseParadigm;
+}
+
+export function conjugateUkrainianVerbPhrase(
+  ltInfinitive: string,
+  rawUk: string,
+  tense: VerbTense,
+  person: VerbPerson
+): string {
+  const cleanLt = ltInfinitive.replace(/\s*\([^)]*\)\s*/g, '').trim();
+
+  // Special impersonal/modal overrides for natural Ukrainian sentences
+  let effectiveUk = rawUk;
+  if (cleanLt === 'lyti') effectiveUk = 'дощити';
+  else if (cleanLt === 'snigti') effectiveUk = 'сніжити';
+  else if (cleanLt === 'reikėti') effectiveUk = 'потребувати';
+  else if (cleanLt === 'trokšti') effectiveUk = 'прагнути';
+
+  // Remove parenthetical notes first so '/' inside parentheses doesn't split the phrase
+  const withoutParens = effectiveUk.replace(/\s*\([^)]*\)\s*/g, ' ').trim();
+  const primaryPhrase = withoutParens
+    .split(/[,;/]/)[0]
+    .trim()
+    .replace(/\s+/g, ' ');
+
+  const words = primaryPhrase.split(' ');
+  const firstWord = words[0];
+  const restWords = words.slice(1).join(' ');
+  const suffix = restWords ? ` ${restWords}` : '';
+
+  const paradigm = buildUkrainianVerbParadigm(firstWord);
+  const personIdx: Record<VerbPerson, number> = {
+    as: 0,
+    tu: 1,
+    jis: 2,
+    mes: 3,
+    jus: 4,
+    jie: 5,
+  };
+
+  if (tense === 'present') {
+    return `${paradigm.nonPast[personIdx[person]]}${suffix}`;
+  }
+
+  if (tense === 'past') {
+    const pastForm =
+      person === 'as' || person === 'tu' || person === 'jis'
+        ? paradigm.pastSg
+        : paradigm.pastPl;
+    return `${pastForm}${suffix}`;
+  }
+
+  if (tense === 'future') {
+    if (firstWord === 'бути') {
+      const futBe: Record<VerbPerson, string> = {
+        as: 'буду',
+        tu: 'будеш',
+        jis: 'буде',
+        mes: 'будемо',
+        jus: 'будете',
+        jie: 'будуть',
+      };
+      return `${futBe[person]}${suffix}`;
+    }
+    if (firstWord === 'могти') {
+      const futCan: Record<VerbPerson, string> = {
+        as: 'зможу',
+        tu: 'зможеш',
+        jis: 'зможе',
+        mes: 'зможемо',
+        jus: 'зможете',
+        jie: 'зможуть',
+      };
+      return `${futCan[person]}${suffix}`;
+    }
+    if (paradigm.isPerfective) {
+      return `${paradigm.nonPast[personIdx[person]]}${suffix}`;
+    }
+    const auxBe: Record<VerbPerson, string> = {
+      as: 'буду',
+      tu: 'будеш',
+      jis: 'буде',
+      mes: 'будемо',
+      jus: 'будете',
+      jie: 'будуть',
+    };
+    return `${auxBe[person]} ${firstWord}${suffix}`;
+  }
+
+  // imperative
+  if (person === 'mes') return `${paradigm.impMes}${suffix}`;
+  if (person === 'jus') return `${paradigm.impJus}${suffix}`;
+  return `${paradigm.impTu}${suffix}`;
+}
+
+const IRREGULAR_EN_PAST: Record<string, string> = {
+  be: 'was',
+  have: 'had',
+  do: 'did',
+  make: 'made',
+  go: 'went',
+  come: 'came',
+  take: 'took',
+  give: 'gave',
+  get: 'got',
+  find: 'found',
+  think: 'thought',
+  know: 'knew',
+  see: 'saw',
+  hear: 'heard',
+  speak: 'spoke',
+  say: 'said',
+  tell: 'told',
+  write: 'wrote',
+  read: 'read',
+  eat: 'ate',
+  drink: 'drank',
+  sleep: 'slept',
+  wake: 'woke',
+  sit: 'sat',
+  stand: 'stood',
+  lie: 'lay',
+  put: 'put',
+  keep: 'kept',
+  hold: 'held',
+  throw: 'threw',
+  buy: 'bought',
+  sell: 'sold',
+  pay: 'paid',
+  cost: 'cost',
+  choose: 'chose',
+  spend: 'spent',
+  lend: 'lent',
+  build: 'built',
+  send: 'sent',
+  drive: 'drove',
+  fly: 'flew',
+  swim: 'swam',
+  run: 'ran',
+  bring: 'brought',
+  meet: 'met',
+  teach: 'taught',
+  understand: 'understood',
+  forget: 'forgot',
+  draw: 'drew',
+  sing: 'sang',
+  shine: 'shone',
+  blow: 'blew',
+  freeze: 'froze',
+  grow: 'grew',
+  rise: 'rose',
+  burn: 'burnt',
+  feel: 'felt',
+  fall: 'fell',
+  hurt: 'hurt',
+  break: 'broke',
+  wear: 'wore',
+  sew: 'sewed',
+  cut: 'cut',
+  leave: 'left',
+  begin: 'began',
+  become: 'became',
+  feed: 'fed',
+  pour: 'poured',
+};
+
+export function conjugateEnglishVerbPhrase(
+  rawEn: string,
+  tense: VerbTense,
+  person: VerbPerson
+): string {
+  const withoutParens = rawEn.replace(/\s*\([^)]*\)\s*/g, ' ').trim();
+  const primary = withoutParens
+    .replace(/^to\s+/i, '')
+    .split(/[,;/]/)[0]
+    .trim()
+    .replace(/\s+/g, ' ');
+
+  const words = primary.split(' ');
+  const first = words[0].toLowerCase();
+  const rest = words.slice(1).join(' ');
+  const suffix = rest ? ` ${rest}` : '';
+
+  if (tense === 'imperative') {
+    if (person === 'mes') return `let's ${first}${suffix}`;
+    return `${first}${suffix}`;
+  }
+
+  if (tense === 'future') {
+    if (first === 'can') return `will be able to${suffix}`;
+    return `will ${first}${suffix}`;
+  }
+
+  if (tense === 'past') {
+    if (first === 'be') {
+      const bePast =
+        person === 'as' || person === 'jis' ? 'was' : 'were';
+      return `${bePast}${suffix}`;
+    }
+    if (first === 'can') return `could${suffix}`;
+    if (IRREGULAR_EN_PAST[first]) {
+      return `${IRREGULAR_EN_PAST[first]}${suffix}`;
+    }
+    if (first.endsWith('e')) return `${first}d${suffix}`;
+    if (/[^aeiou]y$/.test(first)) {
+      return `${first.slice(0, -1)}ied${suffix}`;
+    }
+    if (/^[a-z]*[^aeiou][aeiou][b-df-hj-np-tv-z]$/.test(first) && !/[wxy]$/.test(first) && first.length <= 4) {
+      return `${first}${first.slice(-1)}ed${suffix}`;
+    }
+    return `${first}ed${suffix}`;
+  }
+
+  // present
+  if (first === 'be') {
+    const bePres =
+      person === 'as' ? 'am' : person === 'jis' ? 'is' : 'are';
+    return `${bePres}${suffix}`;
+  }
+  if (first === 'have') {
+    return `${person === 'jis' ? 'has' : 'have'}${suffix}`;
+  }
+  if (first === 'can') {
+    return `can${suffix}`;
+  }
+  if (person === 'jis') {
+    if (/(s|sh|ch|x|z|o)$/.test(first)) return `${first}es${suffix}`;
+    if (/[^aeiou]y$/.test(first)) return `${first.slice(0, -1)}ies${suffix}`;
+    return `${first}s${suffix}`;
+  }
+  return `${first}${suffix}`;
+}
+
 export function generateVerbContextExample(
   verb: {
     infinitive: string;
@@ -846,8 +2701,6 @@ export function generateVerbContextExample(
   person: VerbPerson
 ): VerbSentenceExample {
   const comp = TOPIC_CONTEXT_COMPLEMENTS[verb.topic][verb.governedCase];
-  const baseUk = verb.uk.split(/[,;/]/)[0].trim();
-  const baseEn = verb.en.replace(/^to\s+/i, '').split(/[,;/]/)[0].trim();
 
   const pronounsLt: Record<VerbPerson, string> = {
     as: 'Aš',
@@ -878,13 +2731,24 @@ export function generateVerbContextExample(
     const impPerson: 'tu' | 'mes' | 'jus' =
       person === 'mes' ? 'mes' : person === 'jus' ? 'jus' : 'tu';
     const targetForm = verb.imperative[impPerson];
+    const ukImpVerb = conjugateUkrainianVerbPhrase(
+      verb.infinitive,
+      verb.uk,
+      'imperative',
+      impPerson
+    );
+    const enImpVerb = conjugateEnglishVerbPhrase(
+      verb.en,
+      'imperative',
+      impPerson
+    );
     return {
       tense: 'imperative',
       person: impPerson,
       sentenceWithBlank: `Prašau, ___ (${verb.infinitive}) ${comp.lt}!`,
       fullSentenceLt: `Prašau, ${targetForm} ${comp.lt}!`,
-      translationUk: `Будь ласка, (${baseUk} — ${VERB_PERSONS_METADATA[impPerson].pronounLt}) ${comp.uk}!`,
-      translationEn: `Please (${baseEn} — ${VERB_PERSONS_METADATA[impPerson].pronounLt}) ${comp.en}!`,
+      translationUk: `Будь ласка, ${ukImpVerb} ${comp.uk}!`,
+      translationEn: `Please ${enImpVerb} ${comp.en}!`,
     };
   }
 
@@ -902,26 +2766,21 @@ export function generateVerbContextExample(
       ? verb.past[person]
       : verb.future[person];
 
-  const tenseTagUk =
-    tense === 'present'
-      ? 'тепер. час'
-      : tense === 'past'
-      ? 'мин. час'
-      : 'майб. час';
-  const tenseTagEn =
-    tense === 'present'
-      ? 'present'
-      : tense === 'past'
-      ? 'past'
-      : 'future';
+  const ukVerbForm = conjugateUkrainianVerbPhrase(
+    verb.infinitive,
+    verb.uk,
+    tense,
+    person
+  );
+  const enVerbForm = conjugateEnglishVerbPhrase(verb.en, tense, person);
 
   return {
     tense,
     person,
     sentenceWithBlank: `${pronounsLt[person]} ${timeAdv.lt} ___ (${verb.infinitive}) ${comp.lt}.`,
     fullSentenceLt: `${pronounsLt[person]} ${timeAdv.lt} ${targetForm} ${comp.lt}.`,
-    translationUk: `${pronounsUk[person]} ${timeAdv.uk} [${baseUk}, ${tenseTagUk}] ${comp.uk}.`,
-    translationEn: `${pronounsEn[person]} [${baseEn}, ${tenseTagEn}] ${comp.en} ${timeAdv.en}.`,
+    translationUk: `${pronounsUk[person]} ${timeAdv.uk} ${ukVerbForm} ${comp.uk}.`,
+    translationEn: `${pronounsEn[person]} ${enVerbForm} ${comp.en} ${timeAdv.en}.`,
   };
 }
 

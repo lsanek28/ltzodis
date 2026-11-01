@@ -169,7 +169,8 @@ export const UI_TEXT: Record<
 > = {
   uk: {
     appName: 'Lietuvių žodžių galūnės',
-    appSubtitle: 'Інтерактивний тренажер відмінювання литовських іменників',
+    appSubtitle:
+      'Інтерактивний тренажер литовських іменників (відмінки) та дієслів (часи й дієвідміни)',
     nav: {
       home: 'Головна',
       practice: 'Тренування',
@@ -180,9 +181,10 @@ export const UI_TEXT: Record<
       settings: 'Налаштування',
     },
     ctaStartPractice: 'Почати навчання',
-    heroTagline: 'Daiktavardžių linksniavimas · 5 типів відмінювання · 7 відмінків',
+    heroTagline:
+      '1000 Іменників (7 відмінків · 5 відмін) + 500 Дієслів (I–III дієвідміни · 4 часи)',
     heroDescription:
-      'Практикуйте закінчення литовських іменників в однині та множині: вводьте форми з клавіатури, перевіряйте чергування основи й вивчайте граматичні правила.',
+      'Опановуйте закінчення литовських іменників і дієслів у живому контексті: тренуйте 7 відмінків, 3 основні форми дієслова, усі часи, керування відмінками та словникові картки.',
     kpiVerifiedNouns: 'Перевірених слів',
     kpiVerifiedForms: 'Відмінкових форм',
     kpiMasteredWords: 'Вивчено слів',
@@ -341,7 +343,8 @@ export const UI_TEXT: Record<
   },
   lt: {
     appName: 'Lietuvių žodžių galūnės',
-    appSubtitle: 'Interaktyvus lietuvių kalbos daiktavardžių linksniavimo treniruoklis',
+    appSubtitle:
+      'Interaktyvus lietuvių kalbos daiktavardžių linksniavimo ir veiksmažodžių asmenavimo treniruoklis',
     nav: {
       home: 'Pradžia',
       practice: 'Treniruotė',
@@ -352,9 +355,10 @@ export const UI_TEXT: Record<
       settings: 'Nustatymai',
     },
     ctaStartPractice: 'Pradėti mokymąsi',
-    heroTagline: 'Daiktavardžių linksniavimas · 5 linksniuotės · 7 linksniai',
+    heroTagline:
+      '1000 Daiktavardžių (7 linksniai · 5 linksniuotės) + 500 Veiksmažodžių (I–III asmenuotės · 4 laikai)',
     heroDescription:
-      'Praktikuokite lietuvių kalbos daiktavardžių galūnes vienaskaitoje ir daugiskaitoje: įveskite formas klaviatūra, stebėkite kamieno kaitą ir mokykitės taisyklių.',
+      'Praktikuokite lietuvių kalbos daiktavardžių linksnius ir veiksmažodžių laikus: įveskite formas klaviatūra, analizuokite kamieno kaitą, linksnių valdymą ir mokykitės su kortelėmis.',
     kpiVerifiedNouns: 'Patikrinti žodžiai',
     kpiVerifiedForms: 'Linksnių formos',
     kpiMasteredWords: 'Išmokta žodžių',
@@ -513,7 +517,8 @@ export const UI_TEXT: Record<
   },
   en: {
     appName: 'Lietuvių žodžių galūnės',
-    appSubtitle: 'Interactive Lithuanian Noun Declension Trainer',
+    appSubtitle:
+      'Interactive Lithuanian Noun Declension & Verb Conjugation Trainer',
     nav: {
       home: 'Home',
       practice: 'Practice',
@@ -524,9 +529,10 @@ export const UI_TEXT: Record<
       settings: 'Settings',
     },
     ctaStartPractice: 'Start Learning',
-    heroTagline: 'Daiktavardžių linksniavimas · 5 Declensions · 7 Cases',
+    heroTagline:
+      '1,000 Nouns (7 Cases · 5 Declensions) + 500 Verbs (I–III Conjugations · 4 Tenses)',
     heroDescription:
-      'Master Lithuanian noun endings across singular and plural forms: type answers actively, inspect stem alternations, and learn normative grammar rules.',
+      'Master Lithuanian noun case endings and verb conjugations in context: practice all 7 cases, 3 principal verb stems, 4 tenses, case governance, and vocabulary flashcards.',
     kpiVerifiedNouns: 'Verified Nouns',
     kpiVerifiedForms: 'Verified Case Forms',
     kpiMasteredWords: 'Words Mastered',

@@ -26,8 +26,7 @@ import {
   VolumeX,
   X,
 } from 'lucide-react';
-import { ALL_VERIFIED_NOUNS } from './data/nounsDatabase';
-import { ALL_VERIFIED_VERBS } from './data/verbsDatabase';
+import { HomeDashboard } from './components/HomeDashboard';
 import {
   CASES_METADATA,
   CASE_ORDER,
@@ -1400,195 +1399,49 @@ export default function App() {
       {/* Main Content Router */}
       <main className={isMobilePracticeSingleCard ? 'md:flex-1' : 'flex-1'}>
         {activeTab === 'home' && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-            {/* Hero Split Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-              <div className="lg:col-span-7 p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-6">
-                <div className="space-y-3">
-                  <div className="text-xs font-medium text-amber-700 dark:text-amber-400">
-                    {t.heroTagline}
-                  </div>
-                  <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">
-                    {t.appName}
-                  </h1>
-                  <p className="text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
-                    {t.heroDescription}
-                  </p>
-
-                  {/* Quiet Current Mode & Difficulty Indicator with Link to Settings */}
-                  <div className="pt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                    <span>
-                      {TRAINING_MODES_METADATA[trainingMode].title[language]}
-                    </span>
-                    <span aria-hidden="true">·</span>
-                    <span>
-                      {DIFFICULTY_METADATA[effectiveDifficulty].title[language]}
-                    </span>
-                    <span aria-hidden="true">·</span>
-                    <button
-                      type="button"
-                      onClick={() => setSettingsOpen(true)}
-                      className="text-amber-700 dark:text-amber-400 font-semibold hover:underline"
-                    >
-                      {t.nav.settings}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2.5 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPracticeCategory('declension');
-                      setActiveTab('practice');
-                    }}
-                    className="px-4 py-3 rounded-xl bg-slate-900 text-white dark:bg-amber-500 dark:text-slate-950 font-semibold text-xs sm:text-sm hover:opacity-90 transition-opacity flex items-center gap-2 min-h-[46px]"
-                  >
-                    <Play className="w-4 h-4 fill-current" />
-                    <span>
-                      {language === 'uk'
-                        ? '1. Іменники (1000)'
-                        : language === 'lt'
-                        ? '1. Daiktavardžiai (1000)'
-                        : '1. Nouns (1000)'}
-                    </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPracticeCategory('verbs');
-                      setActiveTab('practice');
-                    }}
-                    className="px-4 py-3 rounded-xl bg-indigo-600 text-white font-semibold text-xs sm:text-sm hover:bg-indigo-500 transition-colors flex items-center gap-2 min-h-[46px]"
-                  >
-                    <Play className="w-4 h-4 fill-current" />
-                    <span>
-                      {language === 'uk'
-                        ? '2. Дієслова (500)'
-                        : language === 'lt'
-                        ? '2. Veiksmažodžiai (500)'
-                        : '2. Verbs (500)'}
-                    </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPracticeCategory('flashcards');
-                      setActiveTab('practice');
-                    }}
-                    className="px-4 py-3 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-950 dark:text-amber-300 font-semibold text-xs sm:text-sm hover:bg-amber-500/25 transition-colors flex items-center gap-2 min-h-[46px]"
-                  >
-                    <Layers className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    <span>
-                      {language === 'uk'
-                        ? '3. Картки (1500)'
-                        : language === 'lt'
-                        ? '3. Kortelės (1500)'
-                        : '3. Flashcards (1500)'}
-                    </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('dictionary')}
-                    className="px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-medium text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors min-h-[46px]"
-                  >
-                    {t.nav.dictionary}
-                  </button>
-                </div>
-              </div>
-
-              {/* Right Interactive Preview Card: 5 Declension Paradigms at a Glance */}
-              <div className="lg:col-span-5 p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-4">
-                <div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400">
-                    Daiktavardžių linksniavimas (1–5 linksniuotė)
-                  </div>
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-white mt-0.5">
-                    5 моделей відмінювання (Vardininkas → Kilmininkas)
-                  </h2>
-                </div>
-
-                <div className="divide-y divide-slate-100 dark:divide-slate-800 text-xs sm:text-sm">
-                  {DECLENSION_PDF_TABLE.map((col) => (
-                    <div
-                      key={col.declension}
-                      className="py-2.5 flex items-center justify-between gap-2"
-                    >
-                      <div>
-                        <span className="font-bold text-slate-900 dark:text-white">
-                          {col.titleLt}
-                        </span>
-                        <span className="text-slate-500 mx-1.5">·</span>
-                        <span className="font-mono text-amber-700 dark:text-amber-400 font-semibold">
-                          {col.singularEndings.nom.endings} →{' '}
-                          {col.singularEndings.gen.endings}
-                        </span>
-                      </div>
-                      <span className="text-xs text-slate-500 dark:text-slate-400 italic truncate max-w-[160px]">
-                        {col.singularEndings.gen.examples}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
-                  <span>{t.dailyGoalTitle}</span>
-                  <span className="font-mono font-bold text-slate-900 dark:text-white tabular-nums">
-                    {todayCompleted} / {progress.dailyGoal}{' '}
-                    {t.dailyGoalCompleted}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Full-Width 4-Column KPI Strip Below Hero */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <div className="text-xs text-slate-500 dark:text-slate-400">
-                  {language === 'uk'
-                    ? 'Словник: Іменники · Дієслова'
-                    : language === 'lt'
-                    ? 'Žodynas: Daiktavardžiai · Veiksmažodžiai'
-                    : 'Vocabulary: Nouns · Verbs'}
-                </div>
-                <div className="text-2xl font-bold font-mono tabular-nums text-slate-900 dark:text-white mt-1">
-                  {ALL_VERIFIED_NOUNS.length} + {ALL_VERIFIED_VERBS.length}
-                </div>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <div className="text-xs text-slate-500 dark:text-slate-400">
-                  {t.kpiMasteredWords}
-                </div>
-                <div className="text-2xl font-bold font-mono tabular-nums text-emerald-600 dark:text-emerald-400 mt-1">
-                  {masteredCount} /{' '}
-                  {ALL_VERIFIED_NOUNS.length + ALL_VERIFIED_VERBS.length}
-                </div>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <div className="text-xs text-slate-500 dark:text-slate-400">
-                  {t.kpiAccuracy}
-                </div>
-                <div className="text-2xl font-bold font-mono tabular-nums text-amber-600 dark:text-amber-400 mt-1">
-                  {overallAccuracy}% ({progress.totalCorrectAnswers}/
-                  {progress.totalExercisesCompleted})
-                </div>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <div className="text-xs text-slate-500 dark:text-slate-400">
-                  {t.kpiDailyStreak}
-                </div>
-                <div className="text-2xl font-bold font-mono tabular-nums text-slate-900 dark:text-white mt-1">
-                  {progress.currentStreak} (max {progress.bestStreak})
-                </div>
-              </div>
-            </div>
-          </div>
+          <HomeDashboard
+            language={language}
+            progress={progress}
+            effectiveDifficulty={effectiveDifficulty}
+            trainingMode={trainingMode}
+            todayCompleted={todayCompleted}
+            masteredCount={masteredCount}
+            overallAccuracy={overallAccuracy}
+            onStartDeclension={(modeOverride) => {
+              if (modeOverride) {
+                setTrainingMode(modeOverride);
+              }
+              setPracticeCategory('declension');
+              setActiveTab('practice');
+            }}
+            onStartCasePractice={(grammaticalCase) => {
+              setSelectedCase(grammaticalCase);
+              setTrainingMode('by_case');
+              setPracticeCategory('declension');
+              setActiveTab('practice');
+            }}
+            onStartDeclensionTypePractice={(declension) => {
+              setSelectedDeclension(declension);
+              setTrainingMode('by_declension');
+              setPracticeCategory('declension');
+              setActiveTab('practice');
+            }}
+            onStartVerbs={() => {
+              setPracticeCategory('verbs');
+              setActiveTab('practice');
+            }}
+            onStartFlashcards={() => {
+              setPracticeCategory('flashcards');
+              setActiveTab('practice');
+            }}
+            onOpenDictionary={() => setActiveTab('dictionary')}
+            onOpenReference={() => setActiveTab('reference')}
+            onOpenStats={() => setActiveTab('stats')}
+            onOpenSettings={() => setSettingsOpen(true)}
+            onToggleFavorite={handleToggleFavorite}
+            onPracticeSpecificNoun={handlePracticeSpecificNoun}
+            onPracticeSpecificVerb={handlePracticeSpecificVerb}
+          />
         )}
 
         {activeTab === 'practice' && (

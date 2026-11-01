@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Compass,
+  GraduationCap,
   Keyboard,
   Maximize2,
   MessageSquare,
@@ -18,6 +19,10 @@ import {
   Volume2,
   X,
 } from 'lucide-react';
+import {
+  GrammarAnalysisModal,
+  GrammarAnalysisTarget,
+} from './GrammarAnalysisModal';
 import { ALL_VERIFIED_NOUNS } from '../data/nounsDatabase';
 import { ALL_VERIFIED_VERBS } from '../data/verbsDatabase';
 import {
@@ -127,7 +132,15 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
   onPracticeVerb,
 }) => {
   const t = UI_TEXT[language];
-  const [dictionaryPos, setDictionaryPos] = useState<'nouns' | 'verbs'>('nouns');
+  const [dictionaryPos, setDictionaryPos] = useState<
+    'nouns' | 'verbs' | 'favorites'
+  >('nouns');
+  const [favoritesSubFilter, setFavoritesSubFilter] = useState<
+    'all' | 'nouns' | 'verbs'
+  >('all');
+  const [activeFavoriteKind, setActiveFavoriteKind] = useState<'noun' | 'verb'>(
+    'noun'
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [topicFilter, setTopicFilter] = useState<TopicId | 'all'>('all');
   const [declFilter, setDeclFilter] = useState<DeclensionType | 'all'>('all');
@@ -151,13 +164,39 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
   const [detailTab, setDetailTab] = useState<'forms' | 'usage'>('forms');
   const [showSentencesInTable, setShowSentencesInTable] = useState(false);
   const [focusedCase, setFocusedCase] = useState<GrammaticalCase>('nom');
+  const [grammarAnalysisTarget, setGrammarAnalysisTarget] =
+    useState<GrammarAnalysisTarget | null>(null);
+
+  const gramAnalysisLabel =
+    language === 'uk'
+      ? 'Грам. аналіз'
+      : language === 'lt'
+      ? 'Gram. analizė'
+      : 'Gram. analysis';
+
+  const isFavoritesActive = dictionaryPos === 'favorites' || onlyFavorites;
+
+  const favoriteNounsCount = useMemo(
+    () =>
+      ALL_VERIFIED_NOUNS.filter((n) => progress.favorites.includes(n.id))
+        .length,
+    [progress.favorites]
+  );
+
+  const favoriteVerbsCount = useMemo(
+    () =>
+      ALL_VERIFIED_VERBS.filter((v) => progress.favorites.includes(v.id))
+        .length,
+    [progress.favorites]
+  );
 
   const preFilteredNouns = useMemo(() => {
     return ALL_VERIFIED_NOUNS.filter((noun) => {
       if (topicFilter !== 'all' && noun.topic !== topicFilter) return false;
       if (declFilter !== 'all' && noun.declension !== declFilter) return false;
       if (levelFilter !== 'all' && noun.difficulty !== levelFilter) return false;
-      if (onlyFavorites && !progress.favorites.includes(noun.id)) return false;
+      if (isFavoritesActive && !progress.favorites.includes(noun.id))
+        return false;
       if (onlyExceptions && !noun.stemAlternation) return false;
       return true;
     });
@@ -165,7 +204,7 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
     topicFilter,
     declFilter,
     levelFilter,
-    onlyFavorites,
+    isFavoritesActive,
     onlyExceptions,
     progress.favorites,
   ]);
@@ -187,7 +226,8 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
       if (verbGovFilter !== 'all' && verb.governedCase !== verbGovFilter)
         return false;
       if (levelFilter !== 'all' && verb.difficulty !== levelFilter) return false;
-      if (onlyFavorites && !progress.favorites.includes(verb.id)) return false;
+      if (isFavoritesActive && !progress.favorites.includes(verb.id))
+        return false;
       if (onlyReflexiveVerbs && !verb.isReflexive) return false;
       if (onlyExceptions && !verb.stemAlternation) return false;
       return true;
@@ -197,7 +237,7 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
     verbConjFilter,
     verbGovFilter,
     levelFilter,
-    onlyFavorites,
+    isFavoritesActive,
     onlyReflexiveVerbs,
     onlyExceptions,
     progress.favorites,
@@ -211,6 +251,64 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
     () => rankedVerbMatches.map((m) => m.verb),
     [rankedVerbMatches]
   );
+
+  // Combined favorite items for the dedicated Favorites ('Обране') tab
+  const combinedFavoriteMatches = useMemo(() => {
+    const items: Array<
+      | { kind: 'noun'; nounMatch: (typeof rankedMatches)[number] }
+      | { kind: 'verb'; verbMatch: (typeof rankedVerbMatches)[number] }
+    > = [];
+
+    if (favoritesSubFilter === 'all' || favoritesSubFilter === 'nouns') {
+      for (const nm of rankedMatches) {
+        if (progress.favorites.includes(nm.noun.id)) {
+          items.push({ kind: 'noun', nounMatch: nm });
+        }
+      }
+    }
+    if (favoritesSubFilter === 'all' || favoritesSubFilter === 'verbs') {
+      for (const vm of rankedVerbMatches) {
+        if (progress.favorites.includes(vm.verb.id)) {
+          items.push({ kind: 'verb', verbMatch: vm });
+        }
+      }
+    }
+    return items;
+  }, [
+    favoritesSubFilter,
+    rankedMatches,
+    rankedVerbMatches,
+    progress.favorites,
+  ]);
+
+  // Synchronize selected favorite item when switching to or filtering inside Favorites tab
+  useEffect(() => {
+    if (dictionaryPos !== 'favorites') return;
+    if (combinedFavoriteMatches.length === 0) return;
+
+    const currentStillValid = combinedFavoriteMatches.some((item) =>
+      item.kind === 'noun'
+        ? activeFavoriteKind === 'noun' && selectedNoun?.id === item.nounMatch.noun.id
+        : activeFavoriteKind === 'verb' && selectedVerb?.id === item.verbMatch.verb.id
+    );
+
+    if (!currentStillValid) {
+      const first = combinedFavoriteMatches[0];
+      if (first.kind === 'noun') {
+        setActiveFavoriteKind('noun');
+        setSelectedNoun(first.nounMatch.noun);
+      } else {
+        setActiveFavoriteKind('verb');
+        setSelectedVerb(first.verbMatch.verb);
+      }
+    }
+  }, [
+    dictionaryPos,
+    combinedFavoriteMatches,
+    activeFavoriteKind,
+    selectedNoun,
+    selectedVerb,
+  ]);
 
   // Keep selectedVerb synchronized with top search result when searching
   useEffect(() => {
@@ -493,6 +591,22 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
                   ? 'Įsiminti'
                   : 'Star Favorite'}
               </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                setGrammarAnalysisTarget({
+                  kind: 'noun',
+                  noun,
+                  initialCase: focusedCase,
+                  initialNumber: 'sg',
+                })
+              }
+              className="px-3.5 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950/50 dark:hover:bg-amber-900/60 dark:text-amber-300 dark:border-amber-700/80 font-semibold text-xs transition-colors flex items-center gap-1.5 whitespace-nowrap min-h-[42px]"
+            >
+              <GraduationCap className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <span>{gramAnalysisLabel}</span>
             </button>
 
             <button
@@ -1219,6 +1333,20 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
 
             <button
               type="button"
+              onClick={() =>
+                setGrammarAnalysisTarget({
+                  kind: 'verb',
+                  verb,
+                })
+              }
+              className="px-3.5 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950/50 dark:hover:bg-amber-900/60 dark:text-amber-300 dark:border-amber-700/80 font-semibold text-xs transition-colors flex items-center gap-1.5 whitespace-nowrap min-h-[42px]"
+            >
+              <GraduationCap className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <span>{gramAnalysisLabel}</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => {
                 if (onPracticeVerb) {
                   onPracticeVerb(verb.id);
@@ -1533,8 +1661,8 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-      {/* Header + Part of Speech Switcher (Іменники 1000 / Дієслова 500) */}
-      <div className="border-b border-slate-200 dark:border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      {/* Header + Part of Speech / Favorites Switcher (Іменники 1000 / Дієслова 500 / ★ Обране) */}
+      <div className="border-b border-slate-200 dark:border-slate-800 pb-4 flex flex-col lg:flex-row lg:items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
             {t.dictionary.title}
@@ -1542,18 +1670,24 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
           <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
             {dictionaryPos === 'nouns'
               ? t.dictionary.subtitle
+              : dictionaryPos === 'verbs'
+              ? language === 'uk'
+                ? '500 найпопулярніших литовських дієслів із 3 основними формами, дієвідмінюванням у всіх часах та керуванням відмінками'
+                : language === 'lt'
+                ? '500 populiariausių lietuvių kalbos veiksmažodžių su 3 pagrindinėmis formomis ir asmenavimo lentelėmis'
+                : '500 most popular Lithuanian verbs with 3 principal forms, full tense conjugation tables, and case governance'
               : language === 'uk'
-              ? '500 найпопулярніших литовських дієслів із 3 основними формами, дієвідмінюванням у всіх часах та керуванням відмінками'
+              ? 'Ваші збережені слова (іменники та дієслова) для швидкого перегляду граматичних таблиць, озвучки та цілеспрямованого повторення'
               : language === 'lt'
-              ? '500 populiariausių lietuvių kalbos veiksmažodžių su 3 pagrindinėmis formomis ir asmenavimo lentelėmis'
-              : '500 most popular Lithuanian verbs with 3 principal forms, full tense conjugation tables, and case governance'}
+              ? 'Jūsų įsiminti žodžiai (daiktavardžiai ir veiksmažodžiai) greitam kartojimui'
+              : 'Your saved favorite words (nouns and verbs) for quick paradigm review, audio pronunciation, and focused repetition'}
           </p>
         </div>
 
-        {/* Part-of-Speech Switcher */}
+        {/* Part-of-Speech & Favorites Switcher */}
         <div
           role="tablist"
-          className="grid grid-cols-2 gap-1.5 p-1.5 rounded-2xl bg-slate-200/80 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shrink-0"
+          className="grid grid-cols-3 gap-1.5 p-1.5 rounded-2xl bg-slate-200/80 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shrink-0"
         >
           <button
             type="button"
@@ -1563,7 +1697,7 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
               setDictionaryPos('nouns');
               setIsDrillDownOpen(false);
             }}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
               dictionaryPos === 'nouns'
                 ? 'bg-slate-900 text-white shadow-xs dark:bg-amber-500 dark:text-slate-950'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -1584,7 +1718,7 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
               setDictionaryPos('verbs');
               setIsDrillDownOpen(false);
             }}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
               dictionaryPos === 'verbs'
                 ? 'bg-slate-900 text-white shadow-xs dark:bg-amber-500 dark:text-slate-950'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -1596,11 +1730,112 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
               ? `Veiksmažodžiai (${ALL_VERIFIED_VERBS.length})`
               : `Verbs (${ALL_VERIFIED_VERBS.length})`}
           </button>
+
+          <button
+            type="button"
+            role="tab"
+            aria-selected={dictionaryPos === 'favorites'}
+            onClick={() => {
+              setDictionaryPos('favorites');
+              setIsDrillDownOpen(false);
+            }}
+            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all inline-flex items-center justify-center gap-1.5 ${
+              dictionaryPos === 'favorites'
+                ? 'bg-amber-500 text-slate-950 shadow-xs dark:bg-amber-400 dark:text-slate-950'
+                : 'text-slate-700 dark:text-amber-300 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <Star
+              className={`w-3.5 h-3.5 shrink-0 ${
+                dictionaryPos === 'favorites'
+                  ? 'fill-slate-950 text-slate-950'
+                  : progress.favorites.length > 0
+                  ? 'fill-amber-400 text-amber-500'
+                  : ''
+              }`}
+            />
+            <span>
+              {language === 'uk'
+                ? `Обране (${progress.favorites.length})`
+                : language === 'lt'
+                ? `Įsiminti (${progress.favorites.length})`
+                : `Favorites (${progress.favorites.length})`}
+            </span>
+          </button>
         </div>
       </div>
 
       {/* Search & Interactive Filter Controls */}
       <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4">
+        {/* Sub-filter inside 'Обране' tab */}
+        {dictionaryPos === 'favorites' && (
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
+                <Star className="w-4 h-4 fill-amber-400 text-amber-500" />
+              </span>
+              <div>
+                <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                  {language === 'uk'
+                    ? 'Список обраних слів для повторення'
+                    : language === 'lt'
+                    ? 'Įsimintų žodžių sąrašas kartojimui'
+                    : 'Saved Favorite Words for Review'}
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {language === 'uk'
+                    ? `Іменників: ${favoriteNounsCount} · Дієслів: ${favoriteVerbsCount}`
+                    : language === 'lt'
+                    ? `Daiktavardžiai: ${favoriteNounsCount} · Veiksmažodžiai: ${favoriteVerbsCount}`
+                    : `Nouns: ${favoriteNounsCount} · Verbs: ${favoriteVerbsCount}`}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-1.5">
+              {(
+                [
+                  {
+                    id: 'all',
+                    labelUk: `Усі обрані (${favoriteNounsCount + favoriteVerbsCount})`,
+                    labelLt: `Visi (${favoriteNounsCount + favoriteVerbsCount})`,
+                    labelEn: `All Favorites (${favoriteNounsCount + favoriteVerbsCount})`,
+                  },
+                  {
+                    id: 'nouns',
+                    labelUk: `Іменники (${favoriteNounsCount})`,
+                    labelLt: `Daiktavardžiai (${favoriteNounsCount})`,
+                    labelEn: `Nouns (${favoriteNounsCount})`,
+                  },
+                  {
+                    id: 'verbs',
+                    labelUk: `Дієслова (${favoriteVerbsCount})`,
+                    labelLt: `Veiksmažodžiai (${favoriteVerbsCount})`,
+                    labelEn: `Verbs (${favoriteVerbsCount})`,
+                  },
+                ] as const
+              ).map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setFavoritesSubFilter(tab.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                    favoritesSubFilter === tab.id
+                      ? 'bg-slate-900 text-white dark:bg-amber-500 dark:text-slate-950'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'
+                  }`}
+                >
+                  {language === 'uk'
+                    ? tab.labelUk
+                    : language === 'lt'
+                    ? tab.labelLt
+                    : tab.labelEn}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col md:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -1615,11 +1850,17 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
                     : language === 'lt'
                     ? 'Paieška (tinka ir be lietuviškų raidžių: tetis → tėtis, zmogus → žmogus)...'
                     : 'Search nouns in Lithuanian (even ASCII: tetis → tėtis, zmogus → žmogus) or translation...'
+                  : dictionaryPos === 'verbs'
+                  ? language === 'uk'
+                    ? 'Пошук дієслова (навіть англ. розкладкою: buti → būti, kalbeti → kalbėti, rasyti → rašyti) або перекладом...'
+                    : language === 'lt'
+                    ? 'Veiksmažodžio paieška (pvz., buti → būti, kalbeti → kalbėti, rasyti → rašyti)...'
+                    : 'Search verbs in Lithuanian (even ASCII: buti → būti, kalbeti → kalbėti) or translation...'
                   : language === 'uk'
-                  ? 'Пошук дієслова (навіть англ. розкладкою: buti → būti, kalbeti → kalbėti, rasyti → rašyti) або перекладом...'
+                  ? 'Пошук серед обраних слів (литовською, англ. розкладкою або перекладом)...'
                   : language === 'lt'
-                  ? 'Veiksmažodžio paieška (pvz., buti → būti, kalbeti → kalbėti, rasyti → rašyti)...'
-                  : 'Search verbs in Lithuanian (even ASCII: buti → būti, kalbeti → kalbėti) or translation...'
+                  ? 'Paieška tarp įsimintų žodžių...'
+                  : 'Search within your favorite words...'
               }
               className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-amber-400"
             />
@@ -1647,7 +1888,8 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
             ))}
           </select>
 
-          {dictionaryPos === 'nouns' ? (
+          {dictionaryPos === 'nouns' ||
+          (dictionaryPos === 'favorites' && favoritesSubFilter === 'nouns') ? (
             <select
               value={declFilter}
               onChange={(e) => {
@@ -1666,7 +1908,8 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
                 </option>
               ))}
             </select>
-          ) : (
+          ) : dictionaryPos === 'verbs' ||
+            (dictionaryPos === 'favorites' && favoritesSubFilter === 'verbs') ? (
             <>
               <select
                 value={verbConjFilter}
@@ -1725,7 +1968,7 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
                 ))}
               </select>
             </>
-          )}
+          ) : null}
 
           <select
             value={levelFilter}
@@ -1894,7 +2137,7 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
           )}
 
         {/* Quick Examples of English-Keyboard Search when search bar is empty */}
-        {!searchQuery.trim() && (
+        {!searchQuery.trim() && dictionaryPos !== 'favorites' && (
           <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
             <Keyboard className="w-3.5 h-3.5 text-amber-500 shrink-0 mr-0.5" />
             <span>
@@ -1925,17 +2168,23 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setOnlyFavorites((v) => !v)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 min-h-[36px] ${
-                onlyFavorites
-                  ? 'bg-slate-900 text-white dark:bg-amber-500 dark:text-slate-950'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'
-              }`}
-            >
-              ★ {t.dictionary.onlyFavorites} ({progress.favorites.length})
-            </button>
+            {dictionaryPos !== 'favorites' && (
+              <button
+                type="button"
+                onClick={() => setOnlyFavorites((v) => !v)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 min-h-[36px] ${
+                  onlyFavorites
+                    ? 'bg-slate-900 text-white dark:bg-amber-500 dark:text-slate-950'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'
+                }`}
+              >
+                ★ {t.dictionary.onlyFavorites} (
+                {dictionaryPos === 'nouns'
+                  ? favoriteNounsCount
+                  : favoriteVerbsCount}
+                )
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setOnlyExceptions((v) => !v)}
@@ -1947,7 +2196,9 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
             >
               {t.dictionary.onlyExceptions}
             </button>
-            {dictionaryPos === 'verbs' && (
+            {(dictionaryPos === 'verbs' ||
+              (dictionaryPos === 'favorites' &&
+                favoritesSubFilter !== 'nouns')) && (
               <button
                 type="button"
                 onClick={() => setOnlyReflexiveVerbs((v) => !v)}
@@ -1971,18 +2222,392 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
             <span className="font-semibold text-slate-900 dark:text-white">
               {dictionaryPos === 'nouns'
                 ? filteredNouns.length
-                : filteredVerbs.length}
+                : dictionaryPos === 'verbs'
+                ? filteredVerbs.length
+                : combinedFavoriteMatches.length}
             </span>{' '}
             /{' '}
             {dictionaryPos === 'nouns'
               ? ALL_VERIFIED_NOUNS.length
-              : ALL_VERIFIED_VERBS.length}
+              : dictionaryPos === 'verbs'
+              ? ALL_VERIFIED_VERBS.length
+              : progress.favorites.length}
           </div>
         </div>
       </div>
 
-      {/* Main Content: Either Nouns or Verbs */}
-      {dictionaryPos === 'nouns' ? (
+      {/* Main Content: Nouns, Verbs, or Favorites ('Обране') */}
+      {dictionaryPos === 'favorites' ? (
+        progress.favorites.length === 0 ? (
+          <div className="p-10 sm:p-14 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center max-w-2xl mx-auto space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center mx-auto">
+              <Star className="w-6 h-6" />
+            </div>
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+              {language === 'uk'
+                ? 'У вас ще немає слів у розділі «Обране»'
+                : language === 'lt'
+                ? 'Dar neturite įsimintų žodžių'
+                : 'You have no favorite words saved yet'}
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              {language === 'uk'
+                ? 'Натисніть на зірочку ★ біля будь-якого іменника чи дієслова у словнику або під час тренувань, щоб зберегти складні чи важливі слова сюди для швидкого повторення.'
+                : language === 'lt'
+                ? 'Spustelėkite žvaigždutę ★ šalia bet kurio daiktavardžio ar veiksmažodžio žodyne arba treniruotėse, kad išsaugotumėte juos čia.'
+                : 'Click the star ★ icon next to any noun or verb in the dictionary or during training sessions to save words here for easy repetition.'}
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setDictionaryPos('nouns')}
+                className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-900 text-white hover:bg-slate-800 dark:bg-amber-500 dark:text-slate-950 dark:hover:bg-amber-400 transition-colors"
+              >
+                {language === 'uk'
+                  ? `Переглянути іменники (${ALL_VERIFIED_NOUNS.length})`
+                  : language === 'lt'
+                  ? `Peržiūrėti daiktavardžius (${ALL_VERIFIED_NOUNS.length})`
+                  : `Browse Nouns (${ALL_VERIFIED_NOUNS.length})`}
+              </button>
+              <button
+                type="button"
+                onClick={() => setDictionaryPos('verbs')}
+                className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 text-slate-800 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors"
+              >
+                {language === 'uk'
+                  ? `Переглянути дієслова (${ALL_VERIFIED_VERBS.length})`
+                  : language === 'lt'
+                  ? `Peržiūrėti veiksmažodžius (${ALL_VERIFIED_VERBS.length})`
+                  : `Browse Verbs (${ALL_VERIFIED_VERBS.length})`}
+              </button>
+            </div>
+          </div>
+        ) : isDrillDownOpen ? (
+          <div id="favorite-paradigm-inspector" className="scroll-mt-20">
+            {activeFavoriteKind === 'noun' && selectedNoun
+              ? renderNounDrillDownPanel(selectedNoun, true)
+              : activeFavoriteKind === 'verb' && selectedVerb
+              ? renderVerbDrillDownPanel(selectedVerb, true)
+              : null}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left 5 cols: Combined or Filtered Favorites List */}
+            <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800 max-h-[420px] lg:max-h-[760px] overflow-y-auto">
+              {combinedFavoriteMatches.length === 0 ? (
+                <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                  {language === 'uk'
+                    ? 'Серед обраних слів за вашим фільтром нічого не знайдено.'
+                    : language === 'lt'
+                    ? 'Tarp įsimintų žodžių pagal šį filtrą nieko nerasta.'
+                    : 'No favorite words match your current filter.'}
+                </div>
+              ) : (
+                combinedFavoriteMatches.map((item) => {
+                  if (item.kind === 'noun') {
+                    const { noun } = item.nounMatch;
+                    const isSelected =
+                      activeFavoriteKind === 'noun' &&
+                      selectedNoun?.id === noun.id;
+                    const stat = progress.wordStats[noun.id];
+
+                    return (
+                      <div
+                        key={`fav-noun-${noun.id}`}
+                        onClick={() => {
+                          setActiveFavoriteKind('noun');
+                          setSelectedNoun(noun);
+                          if (window.innerWidth < 1024) {
+                            document
+                              .getElementById('favorite-paradigm-inspector')
+                              ?.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'nearest',
+                              });
+                          }
+                        }}
+                        className={`p-4 cursor-pointer transition-colors flex items-center justify-between gap-3 ${
+                          isSelected
+                            ? 'bg-amber-50/80 dark:bg-slate-800/90'
+                            : 'hover:bg-slate-50 dark:hover:bg-slate-800/40'
+                        }`}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 dark:bg-amber-950/70 dark:text-amber-300">
+                              {language === 'uk'
+                                ? 'Іменник'
+                                : language === 'lt'
+                                ? 'Daikt.'
+                                : 'Noun'}
+                            </span>
+                            <span className="text-base font-bold text-slate-900 dark:text-white truncate">
+                              {noun.lemma}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => speakLithuanian(noun.lemma, e)}
+                              title={
+                                language === 'uk'
+                                  ? 'Озвучити литовською'
+                                  : 'Listen in Lithuanian'
+                              }
+                              className="p-1 rounded-lg text-amber-600 dark:text-amber-400 hover:bg-amber-100/80 dark:hover:bg-slate-700 transition-colors shrink-0"
+                            >
+                              <Volume2 className="w-3.5 h-3.5" />
+                            </button>
+                            <span className="text-xs text-slate-400 font-mono">
+                              → {noun.sg.gen}
+                            </span>
+                            <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                              {DIFFICULTY_CEFR_LABELS[noun.difficulty]}
+                            </span>
+                          </div>
+                          <div className="text-xs text-slate-600 dark:text-slate-300 truncate mt-0.5">
+                            {language === 'en'
+                              ? `${noun.en} · ${noun.uk}`
+                              : `${noun.uk} · ${noun.en}`}
+                          </div>
+                          <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 flex flex-wrap items-center gap-1.5">
+                            <span>{noun.declension} linksn.</span>
+                            <span>·</span>
+                            <span>
+                              {TOPICS_METADATA[noun.topic].label[language]}
+                            </span>
+                            {stat?.mastered && (
+                              <>
+                                <span>·</span>
+                                <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                                  ✓ Mastered
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setGrammarAnalysisTarget({
+                                kind: 'noun',
+                                noun,
+                                initialCase: item.nounMatch.matchedCase ?? 'nom',
+                                initialNumber:
+                                  item.nounMatch.matchedNumber ?? 'sg',
+                                matchedForm: item.nounMatch.matchedForm,
+                              });
+                            }}
+                            title={
+                              language === 'uk'
+                                ? 'Відкрити детальний граматичний аналіз'
+                                : 'Open detailed grammatical analysis'
+                            }
+                            className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 dark:bg-amber-950/50 dark:hover:bg-amber-900/60 dark:text-amber-300 dark:border-amber-800/60 transition-colors inline-flex items-center gap-1"
+                          >
+                            <GraduationCap className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                            <span>{gramAnalysisLabel}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveFavoriteKind('noun');
+                              setSelectedNoun(noun);
+                              setIsDrillDownOpen(true);
+                            }}
+                            className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-900 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 transition-colors hidden sm:inline-flex items-center gap-1"
+                          >
+                            <Table2 className="w-3.5 h-3.5" />
+                            <span>7 відм.</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onToggleFavorite(noun.id);
+                            }}
+                            aria-label="Remove from favorites"
+                            title={
+                              language === 'uk'
+                                ? 'Прибрати з обраного'
+                                : 'Remove from favorites'
+                            }
+                            className="p-2 text-amber-500 hover:text-slate-400 shrink-0 min-h-[40px] min-w-[40px] flex items-center justify-center"
+                          >
+                            <Star className="w-4 h-4 fill-amber-400 text-amber-500" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  const { verb } = item.verbMatch;
+                  const cleanInf = verb.infinitive
+                    .replace(/\s*\([^)]*\)\s*/g, '')
+                    .trim();
+                  const isSelected =
+                    activeFavoriteKind === 'verb' &&
+                    selectedVerb?.id === verb.id;
+                  const stat = progress.wordStats[verb.id];
+
+                  return (
+                    <div
+                      key={`fav-verb-${verb.id}`}
+                      onClick={() => {
+                        setActiveFavoriteKind('verb');
+                        setSelectedVerb(verb);
+                        if (window.innerWidth < 1024) {
+                          document
+                            .getElementById('favorite-paradigm-inspector')
+                            ?.scrollIntoView({
+                              behavior: 'smooth',
+                              block: 'nearest',
+                            });
+                        }
+                      }}
+                      className={`p-4 cursor-pointer transition-colors flex items-center justify-between gap-3 ${
+                        isSelected
+                          ? 'bg-amber-50/80 dark:bg-slate-800/90'
+                          : 'hover:bg-slate-50 dark:hover:bg-slate-800/40'
+                      }`}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-900 dark:bg-indigo-950/70 dark:text-indigo-300">
+                            {language === 'uk'
+                              ? 'Дієслово'
+                              : language === 'lt'
+                              ? 'Veiksm.'
+                              : 'Verb'}
+                          </span>
+                          <span className="text-base font-bold text-slate-900 dark:text-white truncate">
+                            {verb.infinitive}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => speakLithuanian(cleanInf, e)}
+                            title={
+                              language === 'uk'
+                                ? 'Озвучити дієслово литовською'
+                                : 'Listen in Lithuanian'
+                            }
+                            className="p-1 rounded-lg text-amber-600 dark:text-amber-400 hover:bg-amber-100/80 dark:hover:bg-slate-700 transition-colors shrink-0"
+                          >
+                            <Volume2 className="w-3.5 h-3.5" />
+                          </button>
+                          <span className="text-xs text-amber-700 dark:text-amber-400 font-mono font-semibold">
+                            ({verb.present3}, {verb.past3})
+                          </span>
+                          <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                            {DIFFICULTY_CEFR_LABELS[verb.difficulty]}
+                          </span>
+                        </div>
+                        <div className="text-xs text-slate-600 dark:text-slate-300 truncate mt-0.5">
+                          {language === 'en'
+                            ? `${verb.en} · ${verb.uk}`
+                            : `${verb.uk} · ${verb.en}`}
+                        </div>
+                        <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 flex flex-wrap items-center gap-1.5">
+                          <span>{verb.conjugation} asmenuotė</span>
+                          <span>·</span>
+                          <span>
+                            {
+                              VERB_GOVERNED_CASES_METADATA[verb.governedCase]
+                                .shortBadge[language]
+                            }
+                          </span>
+                          <span>·</span>
+                          <span>
+                            {TOPICS_METADATA[verb.topic].label[language]}
+                          </span>
+                          {stat?.mastered && (
+                            <>
+                              <span>·</span>
+                              <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                                ✓ Mastered
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setGrammarAnalysisTarget({
+                              kind: 'verb',
+                              verb,
+                              matchedForm: item.verbMatch.matchedForm,
+                            });
+                          }}
+                          title={
+                            language === 'uk'
+                              ? 'Відкрити детальний граматичний аналіз'
+                              : 'Open detailed grammatical analysis'
+                          }
+                          className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 dark:bg-amber-950/50 dark:hover:bg-amber-900/60 dark:text-amber-300 dark:border-amber-800/60 transition-colors inline-flex items-center gap-1"
+                        >
+                          <GraduationCap className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                          <span>{gramAnalysisLabel}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveFavoriteKind('verb');
+                            setSelectedVerb(verb);
+                            setIsDrillDownOpen(true);
+                          }}
+                          className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-900 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 transition-colors hidden sm:inline-flex items-center gap-1"
+                        >
+                          <Table2 className="w-3.5 h-3.5" />
+                          <span>Часи</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleFavorite(verb.id);
+                          }}
+                          aria-label="Remove from favorites"
+                          title={
+                            language === 'uk'
+                              ? 'Прибрати з обраного'
+                              : 'Remove from favorites'
+                          }
+                          className="p-2 text-amber-500 hover:text-slate-400 shrink-0 min-h-[40px] min-w-[40px] flex items-center justify-center"
+                        >
+                          <Star className="w-4 h-4 fill-amber-400 text-amber-500" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Right 7 cols: Selected Favorite Paradigm Inspector (Noun or Verb) */}
+            <div
+              id="favorite-paradigm-inspector"
+              className="lg:col-span-7 scroll-mt-20"
+            >
+              {activeFavoriteKind === 'noun' && selectedNoun
+                ? renderNounDrillDownPanel(selectedNoun, false)
+                : activeFavoriteKind === 'verb' && selectedVerb
+                ? renderVerbDrillDownPanel(selectedVerb, false)
+                : null}
+            </div>
+          </div>
+        )
+      ) : dictionaryPos === 'nouns' ? (
         isDrillDownOpen && selectedNoun ? (
           <div id="noun-paradigm-inspector" className="scroll-mt-20">
             {renderNounDrillDownPanel(selectedNoun, true)}
@@ -2102,6 +2727,29 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
                       </div>
 
                       <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setGrammarAnalysisTarget({
+                              kind: 'noun',
+                              noun,
+                              initialCase: matchedCase ?? 'nom',
+                              initialNumber: matchedNumber ?? 'sg',
+                              matchedForm,
+                            });
+                          }}
+                          title={
+                            language === 'uk'
+                              ? 'Відкрити детальний граматичний аналіз (рід, число, відмінок, тип відмінювання)'
+                              : 'Open detailed grammatical analysis'
+                          }
+                          className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 dark:bg-amber-950/50 dark:hover:bg-amber-900/60 dark:text-amber-300 dark:border-amber-800/60 transition-colors inline-flex items-center gap-1"
+                        >
+                          <GraduationCap className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                          <span>{gramAnalysisLabel}</span>
+                        </button>
+
                         <button
                           type="button"
                           onClick={(e) => {
@@ -2263,6 +2911,27 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
+                          setGrammarAnalysisTarget({
+                            kind: 'verb',
+                            verb,
+                            matchedForm,
+                          });
+                        }}
+                        title={
+                          language === 'uk'
+                            ? 'Відкрити детальний граматичний аналіз (тип дієвідмінювання, основи, керування)'
+                            : 'Open detailed grammatical analysis'
+                        }
+                        className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 dark:bg-amber-950/50 dark:hover:bg-amber-900/60 dark:text-amber-300 dark:border-amber-800/60 transition-colors inline-flex items-center gap-1"
+                      >
+                        <GraduationCap className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                        <span>{gramAnalysisLabel}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setSelectedVerb(verb);
                           setIsDrillDownOpen(true);
                         }}
@@ -2303,6 +2972,14 @@ export const DictionaryCatalog: React.FC<DictionaryCatalogProps> = ({
           </div>
         </div>
       )}
+
+      {/* Grammatical Analysis Popup Modal */}
+      <GrammarAnalysisModal
+        target={grammarAnalysisTarget}
+        language={language}
+        onClose={() => setGrammarAnalysisTarget(null)}
+        onSpeak={speakLithuanian}
+      />
     </div>
   );
 };
