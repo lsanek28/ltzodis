@@ -1,0 +1,6 @@
+{
+  "name": "Lietuvių žodžių galūnės",
+  "description": "Інтерактивний тренажер відмінювання литовських іменників (5 типів відмінювання, 7 відмінків однини й множини, перевірка закінчень, статистика та Android Kotlin/Compose код).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

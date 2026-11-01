@@ -1,0 +1,79 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidOptionalString(data, field, maxLen) {
+      return !(field in data) || (data[field] is string && data[field].size() <= maxLen);
+    }
+
+    function isValidNonNegativeInt(val) {
+      return val is int && val >= 0 && val <= 10000000;
+    }
+
+    function isValidUserProgressDoc(data, userId) {
+      let allowedKeys = [
+        'uid',
+        'email',
+        'displayName',
+        'photoURL',
+        'providerId',
+        'progressJson',
+        'totalExercisesCompleted',
+        'totalCorrectAnswers',
+        'currentStreak',
+        'bestStreak',
+        'masteredWordsCount',
+        'createdAt',
+        'updatedAt'
+      ];
+      let requiredKeys = [
+        'uid',
+        'progressJson',
+        'totalExercisesCompleted',
+        'totalCorrectAnswers',
+        'currentStreak',
+        'bestStreak',
+        'masteredWordsCount',
+        'createdAt',
+        'updatedAt'
+      ];
+      return data.keys().hasAll(requiredKeys) &&
+        data.keys().hasOnly(allowedKeys) &&
+        data.uid is string &&
+        data.uid == userId &&
+        data.progressJson is string &&
+        data.progressJson.size() >= 2 &&
+        data.progressJson.size() <= 800000 &&
+        isValidNonNegativeInt(data.totalExercisesCompleted) &&
+        isValidNonNegativeInt(data.totalCorrectAnswers) &&
+        isValidNonNegativeInt(data.currentStreak) &&
+        isValidNonNegativeInt(data.bestStreak) &&
+        isValidNonNegativeInt(data.masteredWordsCount) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp &&
+        isValidOptionalString(data, 'email', 320) &&
+        isValidOptionalString(data, 'displayName', 200) &&
+        isValidOptionalString(data, 'photoURL', 2048) &&
+        isValidOptionalString(data, 'providerId', 100);
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) &&
+        isValidUserProgressDoc(request.resource.data, userId);
+      allow update: if isOwner(userId) &&
+        isValidUserProgressDoc(request.resource.data, userId) &&
+        request.resource.data.uid == resource.data.uid &&
+        request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isOwner(userId);
+    }
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "entities": {
+    "UserProgressDoc": {
+      "title": "UserProgressDoc",
+      "description": "Stores an authenticated learner's profile metadata and full synchronized Lithuanian declension learning progress.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Immutable Firebase Auth UID of the account owner."
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User display name."
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "User avatar photo URL."
+        },
+        "providerId": {
+          "type": "string",
+          "description": "Primary authentication provider identifier (google.com, apple.com, password)."
+        },
+        "progressJson": {
+          "type": "string",
+          "description": "Serialized UserProgress JSON state including wordStats, caseStats, declensionStats, topicStats, dailyActivity, favorites, unlockedBadges, and recentMistakes."
+        },
+        "totalExercisesCompleted": {
+          "type": "integer",
+          "description": "Total completed exercises count."
+        },
+        "totalCorrectAnswers": {
+          "type": "integer",
+          "description": "Total correct answers count."
+        },
+        "currentStreak": {
+          "type": "integer",
+          "description": "Current consecutive correct answer streak."
+        },
+        "bestStreak": {
+          "type": "integer",
+          "description": "Best consecutive correct answer streak."
+        },
+        "masteredWordsCount": {
+          "type": "integer",
+          "description": "Total mastered Lithuanian nouns count."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the cloud profile was first created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the cloud progress was last synchronized."
+        }
+      },
+      "required": [
+        "uid",
+        "progressJson",
+        "totalExercisesCompleted",
+        "totalCorrectAnswers",
+        "currentStreak",
+        "bestStreak",
+        "masteredWordsCount",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserProgressDoc"
+      },
+      "description": "Private per-user document storing learning progress, statistics, settings, and profile metadata."
+    }
+  }
+}
